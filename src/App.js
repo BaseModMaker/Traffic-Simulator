@@ -1,23 +1,21 @@
-import logo from './logo.svg';
 import './App.css';
-import * as THREE from 'three';
+import Renderer from './Renderer';
+
+import { useEffect, useRef } from 'react';
 
 function App() {
+  const rendererContainerRef = useRef(null);
+
+  useEffect(() => {
+    const renderer = new Renderer(rendererContainerRef.current, process.env.PUBLIC_URL + '/blocks/grass.png');
+    renderer.start();
+    return () => renderer.stop();
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+      <header className="App-header" style={{ padding: 0, margin: 0, width: '100vw', height: '100vh' }}>
+        <div ref={rendererContainerRef} style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0 }} />
       </header>
     </div>
   );
