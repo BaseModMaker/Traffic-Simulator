@@ -1,19 +1,23 @@
 import * as THREE from 'three';
+import spritestack from './Spritestack';
 
 // Renderer class: draws a 2D image rotating in 3D space, filling the screen
 export default class Renderer {
-  constructor(container, imageUrl) {
+  constructor(container, imageUrl, x, y, z) {
     this.container = container;
     this.imageUrl = imageUrl;
+    this.x = x;
+    this.y = y;
+    this.z = z;
     this.scene = null;
     this.camera = null;
     this.renderer = null;
-    this.mesh = null;
+    this.meshes = [];
     this.frameId = null;
     this.handleResize = this.handleResize.bind(this);
   }
 
-  init() {
+  async init() {
     // Scene
     this.scene = new THREE.Scene();
 
@@ -31,18 +35,27 @@ export default class Renderer {
     this.renderer.setClearColor(0x000000, 0); // transparent
 
     // Add renderer to container
-    this.container.appendChild(this.renderer.domElement);
+    if (this.container && this.renderer.domElement && !this.container.contains(this.renderer.domElement)) {
+      this.container.appendChild(this.renderer.domElement);
+    }
 
-    // Texture and Mesh
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load(this.imageUrl, (texture) => {
+    // SpriteStack: split image into z slices of x by y
+    const slices = await spritestack(this.imageUrl, this.x, this.y, this.z);
+
+    // For each slice, create a plane and stack them
+    const loader = new THREE.TextureLoader();
+    for (let i = 0; i < slices.length; i++) {
       if (!this.scene) return; // Prevent error if scene is disposed
+      const texture = await new Promise(resolve => loader.load(slices[i], resolve));
       const geometry = new THREE.PlaneGeometry(1, 1);
       const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-      this.mesh = new THREE.Mesh(geometry, material);
-      this.scene.add(this.mesh);
-      this.animate(); // Start animation only after mesh is loaded
-    });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.z = i * 0.05; // stack with small offset
+      this.scene.add(mesh);
+      this.meshes.push(mesh);
+    }
+
+    this.animate(); // Start animation after all slices are loaded
 
     window.addEventListener('resize', this.handleResize);
   }
@@ -57,8 +70,7 @@ export default class Renderer {
   }
 
   start() {
-    this.init();
-    // animation now starts after mesh is loaded
+    this.init(); // animation starts after mesh is loaded
   }
 
   stop() {
@@ -71,13 +83,14 @@ export default class Renderer {
     this.scene = null;
     this.camera = null;
     this.renderer = null;
-    this.mesh = null;
+    this.meshes = [];
   }
 
   animate = () => {
     this.frameId = requestAnimationFrame(this.animate);
-    if (this.mesh) {
-      this.mesh.rotation.z += 0.01;
+    // Rotate all stacked meshes together
+    for (const mesh of this.meshes) {
+      mesh.rotation.z += 0.01;
     }
     if (this.renderer && this.scene && this.camera) {
       this.renderer.render(this.scene, this.camera);

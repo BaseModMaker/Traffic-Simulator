@@ -7,7 +7,13 @@ function App() {
   const rendererContainerRef = useRef(null);
 
   useEffect(() => {
-    const renderer = new Renderer(rendererContainerRef.current, process.env.PUBLIC_URL + '/blocks/grass.png');
+    const renderer = new Renderer(
+      rendererContainerRef.current,
+      process.env.PUBLIC_URL + '/cars/cars-0.png',
+      34, // x
+      15, // y
+      13  // z
+    );
     renderer.start();
     return () => renderer.stop();
   }, []);
