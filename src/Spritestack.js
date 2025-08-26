@@ -13,6 +13,7 @@ export default async function spritestack(imageUrl, x, y, z) {
   canvas.width = y;
   canvas.height = x;
   const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false; // Prevent blurring
 
   for (let i = 0; i < z; i++) {
     ctx.clearRect(0, 0, y, x);

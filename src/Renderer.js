@@ -44,13 +44,17 @@ export default class Renderer {
 
     // For each slice, create a plane and stack them
     const loader = new THREE.TextureLoader();
+    const aspect = this.y / this.x; // width / height of each slice
     for (let i = 0; i < slices.length; i++) {
       if (!this.scene) return; // Prevent error if scene is disposed
       const texture = await new Promise(resolve => loader.load(slices[i], resolve));
-      const geometry = new THREE.PlaneGeometry(1, 1);
+      texture.magFilter = THREE.NearestFilter;
+      texture.minFilter = THREE.NearestFilter;
+      // PlaneGeometry(width, height): keep aspect ratio
+      const geometry = new THREE.PlaneGeometry(aspect, 1);
       const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
       const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.z = i * 0.05; // stack with small offset
+      mesh.position.z = i * 0.03; // stack with small offset
       this.scene.add(mesh);
       this.meshes.push(mesh);
     }
