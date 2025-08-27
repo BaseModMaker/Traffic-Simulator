@@ -36,3 +36,21 @@
     transform: rotate(360deg);
   }
 }
+
+.block-tooltip {
+  display: none;
+  position: absolute;
+  left: 60px;
+  top: 10px;
+  background: #222;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+}
+button:hover + .block-tooltip {
+  display: block;
+}

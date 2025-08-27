@@ -36,10 +36,42 @@ export default class Renderer {
     this.lastMouse = { x: 0, y: 0 };
     this.keysPressed = {};
     this.cameraSpherical = { radius: 5, phi: Math.PI / 4, theta: Math.PI / 4 };
+
+    // Additional state for build menu and tile highlighting
+    this.openBuildMenuCallback = null;
+    this.highlightLocked = false;
+    this.lockedTile = null;
+  }
+
+  setOpenBuildMenu(cb) {
+    this.openBuildMenuCallback = cb;
+  }
+
+  setHighlightLocked(locked) {
+    this.highlightLocked = locked;
+    if (!locked) {
+      this.lockedTile = null;
+      if (this.hoveredTile) {
+        this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
+        this.hoveredTile = null;
+      }
+    }
   }
 
   setBuildTileType(type) {
     this.buildTileType = type;
+    if (this.lockedTile) {
+      this.lockedTile.material = this.lockedTile.userData.highlightMaterial = this.materials[type + 'Highlight'].clone();
+      this.lockedTile.userData.baseMaterial = this.materials[type].clone();
+      this.lockedTile.userData.type = type;
+      // After placing, unlock highlight and clear locked tile
+      this.highlightLocked = false;
+      this.lockedTile = null;
+      if (this.hoveredTile) {
+        this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
+        this.hoveredTile = null;
+      }
+    }
   }
 
   async init() {
@@ -192,14 +224,12 @@ export default class Renderer {
   }
 
   handleClick(event) {
+    // If highlight is locked, ignore further clicks
+    if (this.highlightLocked) return;
     if (!this.hoveredTile) return;
-    // Change tile type and update materials
-    const type = this.buildTileType;
-    if (type === 'grass' || type === 'road') {
-      this.hoveredTile.material = this.hoveredTile.userData.highlightMaterial = this.materials[type + 'Highlight'].clone();
-      this.hoveredTile.userData.baseMaterial = this.materials[type].clone();
-      this.hoveredTile.userData.type = type;
-    }
+    // Lock highlight and open build menu
+    this.lockedTile = this.hoveredTile;
+    if (this.openBuildMenuCallback) this.openBuildMenuCallback();
   }
 
   _updateCameraPosition() {
@@ -240,6 +270,19 @@ export default class Renderer {
     }
 
     if (!this.camera || !this.renderer) return;
+
+    // If highlight is locked, only keep the locked tile highlighted
+    if (this.highlightLocked) {
+      if (this.lockedTile && this.hoveredTile !== this.lockedTile) {
+        if (this.hoveredTile) {
+          this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
+        }
+        this.hoveredTile = this.lockedTile;
+        this.hoveredTile.material = this.hoveredTile.userData.highlightMaterial;
+      }
+      return;
+    }
+
     const rect = this.renderer.domElement.getBoundingClientRect();
     this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
