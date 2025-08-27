@@ -101,6 +101,14 @@ button:hover + .block-tooltip {
   opacity: 0.8;
   pointer-events: none;
 }
+.hotbar-slot-empty {
+  width: 38px;
+  height: 38px;
+  opacity: 0.2;
+  background: #444;
+  border-radius: 6px;
+  margin: 0 auto;
+}
 
 .build-menu-center {
   position: fixed;

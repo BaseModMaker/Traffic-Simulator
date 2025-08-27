@@ -228,11 +228,13 @@ export default class Renderer {
     if (!this.gridInteractionEnabled) return;
     // Place the selected tile type on the clicked tile
     if (!this.hoveredTile) return;
+    if (!this.buildTileType || this.buildTileType === 'interact') return;
     this._placeTile(this.hoveredTile);
   }
 
   _placeTile(tile) {
     const type = this.buildTileType || 'grass';
+    if (!type || type === 'interact') return;
     if (this.materials[type]) {
       tile.material = this.materials[type].clone();
       tile.userData.baseMaterial = this.materials[type].clone();
@@ -260,7 +262,7 @@ export default class Renderer {
     if (event.button === 0 && this.gridInteractionEnabled) {
       this.isPlacing = true;
       // Place tile immediately if hovering over one
-      if (this.hoveredTile) {
+      if (this.hoveredTile && this.buildTileType && this.buildTileType !== 'interact') {
         this._placeTile(this.hoveredTile);
       }
     }
@@ -333,7 +335,7 @@ export default class Renderer {
         this.hoveredTile = tile;
       }
       // Paint while mouse is down
-      if (this.isPlacing) {
+      if (this.isPlacing && this.buildTileType && this.buildTileType !== 'interact') {
         this._placeTile(tile);
       }
     }

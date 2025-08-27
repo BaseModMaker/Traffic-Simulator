@@ -4,16 +4,24 @@ import Renderer from './Renderer';
 import { useEffect, useRef, useState } from 'react';
 
 const BLOCKS = [
-  { type: 'grass', icon: process.env.PUBLIC_URL + '/blocks/grass.png', name: 'Grass' },
-  { type: 'road', icon: process.env.PUBLIC_URL + '/blocks/road.png', name: 'Road' }
+  { type: 'interact', icon: process.env.PUBLIC_URL + '/blocks/interact.png', name: 'Interact Tool' },
+  { type: 'road', icon: process.env.PUBLIC_URL + '/blocks/road.png', name: 'Road' },
+  { type: 'grass', icon: process.env.PUBLIC_URL + '/blocks/grass.png', name: 'Grass' }
 ];
+
+const BUILD_MENU_BLOCKS = BLOCKS.filter(b => b.type !== 'interact');
 
 const HOTBAR_SIZE = 10; // 10 slots: 1-9, 0
 
 function App() {
   const rendererContainerRef = useRef(null);
-  // Hotbar state: array of 10 block types (default to 'grass')
-  const [hotbar, setHotbar] = useState(Array(HOTBAR_SIZE).fill('grass'));
+  // Hotbar: slot 1 = interact, 2 = road, 3 = grass, rest empty (null)
+  const [hotbar, setHotbar] = useState([
+    'interact', // 1
+    'road',     // 2
+    'grass',    // 3
+    ...Array(HOTBAR_SIZE - 3).fill(null)
+  ]);
   const [selectedHotbar, setSelectedHotbar] = useState(0);
   const [buildMenuOpen, setBuildMenuOpen] = useState(false);
   const [highlightLocked, setHighlightLocked] = useState(false);
@@ -53,9 +61,11 @@ function App() {
     }
   }, [selectedTile]);
 
-  // When a block is selected in build menu, replace current hotbar slot
+  // When a block is selected in build menu, replace current hotbar slot (except slot 0)
   const handleBlockSelect = (type) => {
     setHotbar((prev) => {
+      // Prevent replacing the interact tool in slot 0
+      if (selectedHotbar === 0) return prev;
       const next = [...prev];
       next[selectedHotbar] = type;
       return next;
@@ -103,7 +113,7 @@ function App() {
           <div className="build-menu-center">
             <div style={{ marginBottom: 16, color: '#fff', fontWeight: 'bold', fontSize: 22 }}>Build Menu</div>
             <div style={{ display: 'flex', gap: 32 }}>
-              {BLOCKS.map(block => (
+              {BUILD_MENU_BLOCKS.map(block => (
                 <div key={block.type} style={{ textAlign: 'center' }}>
                   <button
                     onClick={() => handleBlockSelect(block.type)}
@@ -122,7 +132,10 @@ function App() {
                 </div>
               ))}
             </div>
-            <div style={{ color: '#aaa', fontSize: 14, marginTop: 18 }}>ESC to close • Click to assign to slot {selectedHotbar === 9 ? 0 : selectedHotbar + 1}</div>
+            <div style={{ color: '#aaa', fontSize: 14, marginTop: 18 }}>
+              ESC to close • Click to assign to slot {selectedHotbar === 9 ? 0 : selectedHotbar + 1}
+              {selectedHotbar === 0 && <span style={{ color: '#f77', marginLeft: 8 }}>(Interact tool can't be replaced)</span>}
+            </div>
           </div>
         )}
         <div ref={rendererContainerRef} style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0 }} />
@@ -133,15 +146,21 @@ function App() {
           onMouseLeave={() => setHotbarHovered(false)}
         >
           {hotbar.map((type, idx) => {
-            const block = BLOCKS.find(b => b.type === type) || BLOCKS[0];
+            const block = BLOCKS.find(b => b.type === type);
             return (
               <div
                 key={idx}
                 className={`hotbar-slot${selectedHotbar === idx ? ' hotbar-slot-selected' : ''}`}
                 onClick={() => handleHotbarClick(idx)}
               >
-                <img src={block.icon} alt={block.name} className="hotbar-icon" />
-                <div className="hotbar-slot-num">{idx === 9 ? 0 : idx + 1}</div>
+                {block ? (
+                  <>
+                    <img src={block.icon} alt={block.name} className="hotbar-icon" />
+                    <div className="hotbar-slot-num">{idx === 9 ? 0 : idx + 1}</div>
+                  </>
+                ) : (
+                  <div className="hotbar-slot-empty" />
+                )}
               </div>
             );
           })}
