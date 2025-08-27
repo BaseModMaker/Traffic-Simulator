@@ -60,18 +60,6 @@ export default class Renderer {
 
   setBuildTileType(type) {
     this.buildTileType = type;
-    if (this.lockedTile) {
-      this.lockedTile.material = this.lockedTile.userData.highlightMaterial = this.materials[type + 'Highlight'].clone();
-      this.lockedTile.userData.baseMaterial = this.materials[type].clone();
-      this.lockedTile.userData.type = type;
-      // After placing, unlock highlight and clear locked tile
-      this.highlightLocked = false;
-      this.lockedTile = null;
-      if (this.hoveredTile) {
-        this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
-        this.hoveredTile = null;
-      }
-    }
   }
 
   async init() {
@@ -224,12 +212,16 @@ export default class Renderer {
   }
 
   handleClick(event) {
-    // If highlight is locked, ignore further clicks
-    if (this.highlightLocked) return;
+    // Place the selected tile type on the clicked tile
     if (!this.hoveredTile) return;
-    // Lock highlight and open build menu
-    this.lockedTile = this.hoveredTile;
-    if (this.openBuildMenuCallback) this.openBuildMenuCallback();
+    // Change tile type and update its materials
+    const type = this.buildTileType || 'grass';
+    if (this.materials[type]) {
+      this.hoveredTile.material = this.materials[type].clone();
+      this.hoveredTile.userData.baseMaterial = this.materials[type].clone();
+      this.hoveredTile.userData.highlightMaterial = this.materials[type + 'Highlight'].clone();
+      this.hoveredTile.userData.type = type;
+    }
   }
 
   _updateCameraPosition() {

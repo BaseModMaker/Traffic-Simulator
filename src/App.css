@@ -54,3 +54,67 @@
 button:hover + .block-tooltip {
   display: block;
 }
+
+.hotbar-container {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 30;
+  background: rgba(30,32,38,0.7);
+  border-radius: 14px;
+  padding: 10px 18px;
+  box-shadow: 0 2px 16px #0008;
+}
+
+.hotbar-slot {
+  width: 54px;
+  height: 54px;
+  background: #222;
+  border-radius: 8px;
+  border: 2px solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: border 0.15s;
+}
+.hotbar-slot-selected {
+  border: 2.5px solid #61dafb;
+  box-shadow: 0 0 8px #61dafb88;
+}
+.hotbar-icon {
+  width: 38px;
+  height: 38px;
+  pointer-events: none;
+}
+.hotbar-slot-num {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  color: #aaa;
+  font-size: 13px;
+  font-family: monospace;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.build-menu-center {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 40;
+  background: rgba(40,44,52,0.98);
+  border-radius: 18px;
+  padding: 38px 48px 32px 48px;
+  box-shadow: 0 4px 32px #000a;
+  min-width: 420px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
