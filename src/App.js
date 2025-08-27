@@ -17,6 +17,8 @@ function App() {
   const [selectedHotbar, setSelectedHotbar] = useState(0);
   const [buildMenuOpen, setBuildMenuOpen] = useState(false);
   const [highlightLocked, setHighlightLocked] = useState(false);
+  const [gridInteractionEnabled, setGridInteractionEnabled] = useState(true);
+  const [hotbarHovered, setHotbarHovered] = useState(false);
 
   // Set selectedTile to the currently selected hotbar slot
   const selectedTile = hotbar[selectedHotbar];
@@ -38,6 +40,11 @@ function App() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [buildMenuOpen]);
+
+  // Disable grid interaction when build menu is open or hotbar is hovered
+  useEffect(() => {
+    setGridInteractionEnabled(!buildMenuOpen && !hotbarHovered);
+  }, [buildMenuOpen, hotbarHovered]);
 
   // Update build type in renderer when selected hotbar slot changes
   useEffect(() => {
@@ -63,6 +70,13 @@ function App() {
     }
   }, [highlightLocked]);
 
+  // Pass grid interaction enabled state to renderer
+  useEffect(() => {
+    if (rendererContainerRef.current && rendererContainerRef.current._rendererInstance) {
+      rendererContainerRef.current._rendererInstance.setGridInteractionEnabled?.(gridInteractionEnabled);
+    }
+  }, [gridInteractionEnabled]);
+
   useEffect(() => {
     const renderer = new Renderer(rendererContainerRef.current);
     renderer.setBuildTileType?.(selectedTile);
@@ -70,6 +84,7 @@ function App() {
       // No-op: build menu is now opened with I
     });
     renderer.setHighlightLocked?.(highlightLocked);
+    renderer.setGridInteractionEnabled?.(gridInteractionEnabled);
     renderer.start();
     return () => renderer.stop();
     // eslint-disable-next-line
@@ -78,6 +93,7 @@ function App() {
   // Hotbar slot click handler (selects slot)
   const handleHotbarClick = (idx) => {
     setSelectedHotbar(idx);
+    // No need to setGridInteractionEnabled here, handled by hover logic
   };
 
   return (
@@ -111,7 +127,11 @@ function App() {
         )}
         <div ref={rendererContainerRef} style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0 }} />
         {/* Hotbar UI */}
-        <div className="hotbar-container">
+        <div
+          className="hotbar-container"
+          onMouseEnter={() => setHotbarHovered(true)}
+          onMouseLeave={() => setHotbarHovered(false)}
+        >
           {hotbar.map((type, idx) => {
             const block = BLOCKS.find(b => b.type === type) || BLOCKS[0];
             return (

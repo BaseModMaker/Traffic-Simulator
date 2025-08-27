@@ -41,6 +41,10 @@ export default class Renderer {
     this.openBuildMenuCallback = null;
     this.highlightLocked = false;
     this.lockedTile = null;
+
+    // Grid interaction state
+    this.gridInteractionEnabled = true;
+    this.isPlacing = false; // Track if mouse is down for painting
   }
 
   setOpenBuildMenu(cb) {
@@ -60,6 +64,15 @@ export default class Renderer {
 
   setBuildTileType(type) {
     this.buildTileType = type;
+  }
+
+  setGridInteractionEnabled(enabled) {
+    this.gridInteractionEnabled = enabled;
+    // Remove highlight if disabling interaction
+    if (!enabled && this.hoveredTile) {
+      this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
+      this.hoveredTile = null;
+    }
   }
 
   async init() {
@@ -212,15 +225,19 @@ export default class Renderer {
   }
 
   handleClick(event) {
+    if (!this.gridInteractionEnabled) return;
     // Place the selected tile type on the clicked tile
     if (!this.hoveredTile) return;
-    // Change tile type and update its materials
+    this._placeTile(this.hoveredTile);
+  }
+
+  _placeTile(tile) {
     const type = this.buildTileType || 'grass';
     if (this.materials[type]) {
-      this.hoveredTile.material = this.materials[type].clone();
-      this.hoveredTile.userData.baseMaterial = this.materials[type].clone();
-      this.hoveredTile.userData.highlightMaterial = this.materials[type + 'Highlight'].clone();
-      this.hoveredTile.userData.type = type;
+      tile.material = this.materials[type].clone();
+      tile.userData.baseMaterial = this.materials[type].clone();
+      tile.userData.highlightMaterial = this.materials[type + 'Highlight'].clone();
+      tile.userData.type = type;
     }
   }
 
@@ -239,13 +256,32 @@ export default class Renderer {
       this.lastMouse.x = event.clientX;
       this.lastMouse.y = event.clientY;
     }
+    // Left mouse button for painting
+    if (event.button === 0 && this.gridInteractionEnabled) {
+      this.isPlacing = true;
+      // Place tile immediately if hovering over one
+      if (this.hoveredTile) {
+        this._placeTile(this.hoveredTile);
+      }
+    }
   }
 
   handleMouseUp(event) {
     this.isDragging = false;
+    if (event.button === 0) {
+      this.isPlacing = false;
+    }
   }
 
   handleMouseMove(event) {
+    if (!this.gridInteractionEnabled) {
+      if (this.hoveredTile) {
+        this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
+        this.hoveredTile = null;
+      }
+      return;
+    }
+
     // Camera orbit
     if (this.isDragging) {
       const dx = event.clientX - this.lastMouse.x;
@@ -295,6 +331,10 @@ export default class Renderer {
         }
         tile.material = tile.userData.highlightMaterial;
         this.hoveredTile = tile;
+      }
+      // Paint while mouse is down
+      if (this.isPlacing) {
+        this._placeTile(tile);
       }
     }
   }
