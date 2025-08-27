@@ -21,7 +21,7 @@ export default class Renderer {
     this.textures = {};
     this.materials = {};
     this.cameraZoomSpeed = 0.1;
-    this.cameraMoveSpeed = 0.2;
+    this.cameraMoveSpeed = 2.0; // Increased from 0.2 to 2.0 for faster movement
     this.cameraRotateSpeed = 0.005;
     this.handleWheel = this.handleWheel.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -284,20 +284,33 @@ export default class Renderer {
   _updateCameraTargetFromKeys() {
     // Pan camera target with arrow keys/WASD
     let dx = 0, dz = 0;
+    // Use fractional movement for smoothness
     if (this.keysPressed['arrowup'] || this.keysPressed['w']) dz -= 1;
     if (this.keysPressed['arrowdown'] || this.keysPressed['s']) dz += 1;
     if (this.keysPressed['arrowleft'] || this.keysPressed['a']) dx -= 1;
     if (this.keysPressed['arrowright'] || this.keysPressed['d']) dx += 1;
     if (dx !== 0 || dz !== 0) {
+      // Normalize direction for diagonal movement
+      const len = Math.sqrt(dx * dx + dz * dz);
+      if (len > 0) {
+        dx /= len;
+        dz /= len;
+      }
       // Move in camera's local XZ plane
       const moveSpeed = this.cameraMoveSpeed;
-      // Calculate right and forward vectors
       const theta = this.cameraSpherical.theta;
       const forward = new THREE.Vector3(Math.sin(theta), 0, Math.cos(theta));
       const right = new THREE.Vector3(Math.cos(theta), 0, -Math.sin(theta));
-      this.cameraTarget.add(forward.multiplyScalar(dz * moveSpeed));
-      this.cameraTarget.add(right.multiplyScalar(dx * moveSpeed));
+      // Use delta time for frame-rate independence
+      const now = performance.now();
+      if (!this._lastMoveTime) this._lastMoveTime = now;
+      const dt = Math.min((now - this._lastMoveTime) / 1000, 0.05); // max 50ms step
+      this._lastMoveTime = now;
+      this.cameraTarget.add(forward.multiplyScalar(dz * moveSpeed * dt));
+      this.cameraTarget.add(right.multiplyScalar(dx * moveSpeed * dt));
       this._updateCameraPosition();
+    } else {
+      this._lastMoveTime = undefined;
     }
   }
 
