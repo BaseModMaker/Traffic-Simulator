@@ -1,18 +1,14 @@
 import * as THREE from 'three';
-import spritestack from './Spritestack';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-// Renderer class: draws a 2D image rotating in 3D space, filling the screen
+// Renderer class: loads and displays a GLB model
 export default class Renderer {
-  constructor(container, imageUrl, x, y, z) {
+  constructor(container) {
     this.container = container;
-    this.imageUrl = imageUrl;
-    this.x = x;
-    this.y = y;
-    this.z = z;
     this.scene = null;
     this.camera = null;
     this.renderer = null;
-    this.meshes = [];
+    this.model = null;
     this.frameId = null;
     this.handleResize = this.handleResize.bind(this);
   }
@@ -21,45 +17,50 @@ export default class Renderer {
     // Scene
     this.scene = new THREE.Scene();
 
+    //model scale
+    const modelScale = 20;
+
     // Camera
     const width = window.innerWidth;
     const height = window.innerHeight;
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     this.camera.position.z = 2;
-    this.camera.position.y = -2;
+    this.camera.position.y = 2;
     this.camera.lookAt(0, 0, 0);
 
     // Renderer
     this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     this.renderer.setSize(width, height);
-    this.renderer.setClearColor(0x000000, 0); // transparent
+    this.renderer.setClearColor(0x000000, 0);
 
     // Add renderer to container
     if (this.container && this.renderer.domElement && !this.container.contains(this.renderer.domElement)) {
       this.container.appendChild(this.renderer.domElement);
     }
 
-    // SpriteStack: split image into z slices of x by y
-    const slices = await spritestack(this.imageUrl, this.x, this.y, this.z);
+    // Add lighting so the model is visible
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    this.scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    directionalLight.position.set(5, 10, 7.5);
+    this.scene.add(directionalLight);
 
-    // For each slice, create a plane and stack them
-    const loader = new THREE.TextureLoader();
-    const aspect = this.y / this.x; // width / height of each slice
-    for (let i = 0; i < slices.length; i++) {
-      if (!this.scene) return; // Prevent error if scene is disposed
-      const texture = await new Promise(resolve => loader.load(slices[i], resolve));
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = THREE.NearestFilter;
-      // PlaneGeometry(width, height): keep aspect ratio
-      const geometry = new THREE.PlaneGeometry(aspect, 1);
-      const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.z = i * 0.03; // stack with small offset
-      this.scene.add(mesh);
-      this.meshes.push(mesh);
-    }
-
-    this.animate(); // Start animation after all slices are loaded
+    // Load GLB model
+    const loader = new GLTFLoader();
+    loader.load(
+      process.env.PUBLIC_URL + '/cars/police.glb',
+      (gltf) => {
+        this.model = gltf.scene;
+        // Scale up the model
+        this.model.scale.set(modelScale, modelScale, modelScale);
+        this.scene.add(this.model);
+        this.animate();
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading GLB model:', error);
+      }
+    );
 
     window.addEventListener('resize', this.handleResize);
   }
@@ -74,7 +75,7 @@ export default class Renderer {
   }
 
   start() {
-    this.init(); // animation starts after mesh is loaded
+    this.init();
   }
 
   stop() {
@@ -87,14 +88,14 @@ export default class Renderer {
     this.scene = null;
     this.camera = null;
     this.renderer = null;
-    this.meshes = [];
+    this.model = null;
   }
 
   animate = () => {
     this.frameId = requestAnimationFrame(this.animate);
-    // Rotate all stacked meshes together
-    for (const mesh of this.meshes) {
-      mesh.rotation.z += 0.01;
+    // Rotate the model
+    if (this.model) {
+      this.model.rotation.y += 0.01;
     }
     if (this.renderer && this.scene && this.camera) {
       this.renderer.render(this.scene, this.camera);
