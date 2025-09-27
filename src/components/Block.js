@@ -3,6 +3,7 @@ import * as THREE from 'three';
 export default class Block {
   constructor(type, texturePath) {
     this.type = type;
+    this.icon = texturePath;
     this.texturePath = texturePath;
     this.materials = null;
   }
