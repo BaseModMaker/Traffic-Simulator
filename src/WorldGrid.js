@@ -1,5 +1,3 @@
-import * as THREE from 'three';
-
 export default class WorldGrid {
   constructor(scene, tileCount, tileSize, tiles) {
     this.scene = scene;
