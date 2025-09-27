@@ -7,11 +7,21 @@ const Hotbar = ({ blocks, buildMenuOpen, setBuildMenuOpen, selectedTile, setSele
     'interact', // 1
     'road',     // 2
     'grass',    // 3
-    'garage',   // 4
     ...Array(HOTBAR_SIZE - 4).fill(null)
   ]);
   const [selectedHotbar, setSelectedHotbar] = useState(0);
   const [hotbarHovered, setHotbarHovered] = useState(false);
+
+  // // When a block is selected in build menu, replace current hotbar slot (except slot 0)
+  // const handleBlockSelect = (type) => {
+  //   setHotbar((prev) => {
+  //     if (selectedHotbar === 0) return prev; // Prevent replacing the interact tool in slot 0
+  //     const next = [...prev];
+  //     next[selectedHotbar] = type;
+  //     return next;
+  //   });
+  //   setBuildMenuOpen(false);
+  // };
 
   // Hotbar slot click handler (selects slot)
   const handleHotbarClick = (idx) => {
@@ -29,8 +39,22 @@ const Hotbar = ({ blocks, buildMenuOpen, setBuildMenuOpen, selectedTile, setSele
   return (
     <div
       className="hotbar-container"
-      onMouseEnter={() => setHotbarHovered(true)}
-      onMouseLeave={() => setHotbarHovered(false)}
+      onMouseEnter={() => {
+        setHotbarHovered(true);
+        setBuildMenuOpen(false);
+        if (window.rendererInstance) {
+          window.rendererInstance.setGridInteractionEnabled(false); // Disable grid interaction
+        }
+      }}
+      onMouseLeave={() => {
+        setHotbarHovered(false);
+        if (window.rendererInstance) {
+          window.rendererInstance.setGridInteractionEnabled(true); // Re-enable grid interaction
+        }
+      }}
+      onMouseDown={(e) => {
+        e.stopPropagation(); // Prevent event propagation
+      }}
     >
       {hotbar.map((type, idx) => {
         const block = blocks.find(b => b.type === type);

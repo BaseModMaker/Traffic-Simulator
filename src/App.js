@@ -64,7 +64,11 @@ function App() {
   useEffect(() => {
     const renderer = new Renderer(rendererContainerRef.current);
     renderer.start();
-    return () => renderer.stop();
+    window.rendererInstance = renderer; // Expose renderer instance globally
+    return () => {
+      renderer.stop();
+      window.rendererInstance = null; // Clean up global reference
+    };
     // eslint-disable-next-line
   }, []);
 

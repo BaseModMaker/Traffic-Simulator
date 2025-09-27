@@ -234,13 +234,14 @@ export default class Renderer {
   }
 
   handleMouseDown(event) {
+    if (!this.gridInteractionEnabled) return; // Prevent interaction if disabled
     if (event.button === 2 || (event.button === 0 && event.altKey)) { // right-click or alt+left
       this.isDragging = true;
       this.lastMouse.x = event.clientX;
       this.lastMouse.y = event.clientY;
     }
     // Left mouse button for painting
-    if (event.button === 0 && this.gridInteractionEnabled) {
+    if (event.button === 0) {
       this.isPlacing = true;
       // Place tile immediately if hovering over one
       if (this.hoveredTile && this.buildTileType && this.buildTileType !== 'interact') {
