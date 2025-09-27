@@ -8,7 +8,8 @@ const Hotbar = ({ tiles, buildMenuOpen, setBuildMenuOpen, selectedTile, setSelec
     'road',     // 2
     'grass',    // 3
     'ammo',     // 4
-    ...Array(HOTBAR_SIZE - 4).fill(null)
+    'saloon',   // 5
+    ...Array(HOTBAR_SIZE - 5).fill(null)
   ]);
   const [selectedHotbar, setSelectedHotbar] = useState(0);
   const [hotbarHovered, setHotbarHovered] = useState(false);
@@ -16,7 +17,8 @@ const Hotbar = ({ tiles, buildMenuOpen, setBuildMenuOpen, selectedTile, setSelec
   // Hotbar slot click handler (selects slot)
   const handleHotbarClick = (idx) => {
     setSelectedHotbar(idx);
-    setSelectedTile(hotbar[idx]); // Notify App of the selected tile type
+    const selectedItem = hotbar[idx];
+    setSelectedTile(selectedItem); // Notify App of the selected tile/block type
   };
 
   useEffect(() => {
@@ -47,16 +49,16 @@ const Hotbar = ({ tiles, buildMenuOpen, setBuildMenuOpen, selectedTile, setSelec
       }}
     >
       {hotbar.map((type, idx) => {
-        const tile = tiles.find(t => t.type === type);
+        const item = tiles.find(t => t.type === type); // Find both tiles and blocks
         return (
           <div
             key={idx}
             className={`hotbar-slot${selectedHotbar === idx ? ' hotbar-slot-selected' : ''}`}
             onClick={() => handleHotbarClick(idx)}
           >
-            {tile ? (
+            {item ? (
               <>
-                <img src={tile.icon} alt={tile.name} className="hotbar-icon" />
+                <img src={item.icon} alt={item.name} className="hotbar-icon" />
                 <div className="hotbar-slot-num">{idx === 9 ? 0 : idx + 1}</div>
               </>
             ) : (

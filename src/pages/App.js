@@ -3,6 +3,7 @@ import Renderer from '../utils/Renderer';
 import Hotbar from '../components/Hotbar';
 import Tile from '../components/Tile';
 import Tool from '../components/Tool';
+import Block from '../components/Block';
 
 import { useEffect, useRef, useState } from 'react';
 
@@ -12,11 +13,15 @@ const TOOLS = [
 
 const TILES = [
   new Tile('road', process.env.PUBLIC_URL + '/assets/tiles/road.png', 'Road', process.env.PUBLIC_URL + '/assets/tiles/road.png'),
-  new Tile('grass', process.env.PUBLIC_URL + '/assets/tiles/grass.png', 'Grass', process.env.PUBLIC_URL + '/assets/tiles/grass.png'),
-  new Tile('ammo', process.env.PUBLIC_URL + '/assets/blocks/ammo-icon.png', 'Ammo Block', process.env.PUBLIC_URL + '/assets/blocks/paper ammo factory.jpg')
+  new Tile('grass', process.env.PUBLIC_URL + '/assets/tiles/grass.png', 'Grass', process.env.PUBLIC_URL + '/assets/tiles/grass.png')
 ];
 
-const BUILD_MENU_TILES = TILES;
+const BLOCKS = [
+  new Block('ammo', process.env.PUBLIC_URL + '/assets/blocks/ammo-icon.png'),
+  new Block('saloon', process.env.PUBLIC_URL + '/assets/blocks/saloon.jpg')
+];
+
+const BUILD_MENU_TILES = [...TILES, ...BLOCKS];
 
 function App() {
   const rendererContainerRef = useRef(null);

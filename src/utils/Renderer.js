@@ -125,6 +125,7 @@ export default class Renderer {
     ];
     const blocks = [
       new Block('ammo', process.env.PUBLIC_URL + '/assets/blocks/paper ammo factory.jpg'),
+      new Block('saloon', process.env.PUBLIC_URL + '/assets/blocks/saloon.jpg')
     ];
     await Promise.all(blocks.map(block => block.loadMaterials()));
 
@@ -151,12 +152,12 @@ export default class Renderer {
     if (!this.gridInteractionEnabled) return;
     if (!this.hoveredTile) return;
 
-    if (this.buildTileType === 'ammo') {
-      const { x, z } = this.hoveredTile.userData;
-      const ammoBlock = this.blocks.find(b => b.type === 'ammo');
-      if (ammoBlock) {
-        this.worldGrid.placeBlock(ammoBlock, x, z);
-      }
+    const { x, z } = this.hoveredTile.userData;
+
+    // Check if the selected type is a block
+    const selectedBlock = this.blocks.find(b => b.type === this.buildTileType);
+    if (selectedBlock) {
+      this.worldGrid.placeBlock(selectedBlock, x, z);
       return;
     }
 
