@@ -38,6 +38,8 @@ export default class Renderer {
     this.lastMouse = { x: 0, y: 0 };
     this.keysPressed = {};
     this.cameraSpherical = { radius: 5, phi: Math.PI / 4, theta: Math.PI / 4 };
+    this.targetCameraSpherical = { radius: 5, phi: Math.PI / 4, theta: Math.PI / 4 }; // Target spherical coordinates
+    this.rotationLerpSpeed = 0.1; // Lerp speed for smooth rotation
 
     // Additional state for build menu and tile highlighting
     this.openBuildMenuCallback = null;
@@ -175,6 +177,10 @@ export default class Renderer {
 
   _updateCameraPosition() {
     if (!this.camera) return; // Add null check for camera
+    // Smoothly interpolate spherical coordinates
+    this.cameraSpherical.theta += (this.targetCameraSpherical.theta - this.cameraSpherical.theta) * this.rotationLerpSpeed;
+    this.cameraSpherical.phi += (this.targetCameraSpherical.phi - this.cameraSpherical.phi) * this.rotationLerpSpeed;
+
     // Spherical to Cartesian
     const { radius, phi, theta } = this.cameraSpherical;
     this.camera.position.x = this.cameraTarget.x + radius * Math.sin(phi) * Math.sin(theta);
@@ -284,6 +290,13 @@ export default class Renderer {
 
   handleKeyDown(event) {
     this.keysPressed[event.key.toLowerCase()] = true;
+    // Rotate camera with A and E keys
+    if (event.key.toLowerCase() === 'a' || event.key === 'Shift') {
+        this.targetCameraSpherical.theta -= this.cameraRotateSpeed * 10;
+    }
+    if (event.key.toLowerCase() === 'e' || event.key === '1') {
+        this.targetCameraSpherical.theta += this.cameraRotateSpeed * 10;
+    }
   }
 
   handleKeyUp(event) {
@@ -366,8 +379,9 @@ export default class Renderer {
     this.frameId = requestAnimationFrame(this.animate);
     // Smooth camera movement
     this._updateCameraTargetFromKeys();
+    this._updateCameraPosition(); // Ensure camera position updates every frame
     if (this.renderer && this.scene && this.camera) {
-      this.renderer.render(this.scene, this.camera);
+        this.renderer.render(this.scene, this.camera);
     }
   }
 }
