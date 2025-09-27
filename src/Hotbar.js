@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 const HOTBAR_SIZE = 10;
 
 const Hotbar = ({ blocks, buildMenuOpen, setBuildMenuOpen, selectedTile, setSelectedTile }) => {
-  const [hotbar, setHotbar] = useState([
+  const [hotbar] = useState([
     'interact', // 1
     'road',     // 2
     'grass',    // 3
@@ -12,17 +12,6 @@ const Hotbar = ({ blocks, buildMenuOpen, setBuildMenuOpen, selectedTile, setSele
   ]);
   const [selectedHotbar, setSelectedHotbar] = useState(0);
   const [hotbarHovered, setHotbarHovered] = useState(false);
-
-  // When a block is selected in build menu, replace current hotbar slot (except slot 0)
-  const handleBlockSelect = (type) => {
-    setHotbar((prev) => {
-      if (selectedHotbar === 0) return prev; // Prevent replacing the interact tool in slot 0
-      const next = [...prev];
-      next[selectedHotbar] = type;
-      return next;
-    });
-    setBuildMenuOpen(false);
-  };
 
   // Hotbar slot click handler (selects slot)
   const handleHotbarClick = (idx) => {
