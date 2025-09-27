@@ -34,6 +34,25 @@ export default class Tile {
       emissive: 0x00ff00,
       emissiveIntensity: 0.5,
     });
+
+    if (this.type === 'ammo') {
+      // Split the texture into four parts
+      const size = 0.5;
+      const materials = ['front', 'roof', 'side', 'back'].map((_, i) => {
+        const offsetX = (i % 2) * size;
+        const offsetY = i < 2 ? 0 : size;
+        const subTexture = texture.clone();
+        subTexture.offset.set(offsetX, offsetY);
+        subTexture.repeat.set(size, size);
+        return new THREE.MeshLambertMaterial({ map: subTexture });
+      });
+      this.materials = {
+        front: materials[0],
+        roof: materials[1],
+        side: materials[2],
+        back: materials[3],
+      };
+    }
   }
 
   createMesh(tileSize, x, z, gridSize) {
@@ -53,3 +72,4 @@ export default class Tile {
     return mesh;
   }
 }
+

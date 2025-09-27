@@ -6,6 +6,7 @@ export default class WorldGrid {
     this.gridSize = tileCount * tileSize;
     this.tiles = tiles;
     this.gridMeshes = [];
+    this.blocks = new Map(); // Track blocks placed on the grid
   }
 
   async initialize() {
@@ -27,10 +28,28 @@ export default class WorldGrid {
     const tile = this.tiles.find(t => t.type === tileType);
     if (!tile) return;
 
+    // Remove any block on this tile
+    const blockKey = `${mesh.userData.x},${mesh.userData.z}`;
+    if (this.blocks.has(blockKey)) {
+      const block = this.blocks.get(blockKey);
+      this.scene.remove(block);
+      this.blocks.delete(blockKey);
+    }
+
+    // Apply the tile material
     mesh.material = tile.material.clone();
     mesh.userData.baseMaterial = tile.material.clone();
     mesh.userData.highlightMaterial = tile.highlightMaterial.clone();
     mesh.userData.type = tile.type;
+  }
+
+  placeBlock(block, x, z) {
+    const blockKey = `${x},${z}`;
+    if (this.blocks.has(blockKey)) return; // Prevent placing multiple blocks on the same tile
+
+    const mesh = block.createMesh(this.tileSize, x, z, this.gridSize);
+    this.scene.add(mesh);
+    this.blocks.set(blockKey, mesh);
   }
 
   getMeshes() {

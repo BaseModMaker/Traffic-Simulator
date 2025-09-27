@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import Tile from '../components/Tile';
 import WorldGrid from '../grid/WorldGrid';
+import Block from '../components/Block';
 
 // Renderer class: loads and displays a GLB model
 export default class Renderer {
@@ -118,8 +119,15 @@ export default class Renderer {
     const tiles = [
       new Tile('grass', '', '', process.env.PUBLIC_URL + '/assets/tiles/grass.png'),
       new Tile('road', '', '', process.env.PUBLIC_URL + '/assets/tiles/road.png'),
+      new Tile('ammo', '', 'Ammo Block', process.env.PUBLIC_URL + '/assets/blocks/paper ammo factory.jpg'),
     ];
+    const blocks = [
+      new Block('ammo', process.env.PUBLIC_URL + '/assets/blocks/paper ammo factory.jpg'),
+    ];
+    await Promise.all(blocks.map(block => block.loadMaterials()));
 
+    this.tiles = tiles;
+    this.blocks = blocks;
     this.worldGrid = new WorldGrid(this.scene, tileCount, tileSize, tiles);
     await this.worldGrid.initialize();
     // --- end grid ---
@@ -140,7 +148,15 @@ export default class Renderer {
   handleClick(event) {
     if (!this.gridInteractionEnabled) return;
     if (!this.hoveredTile) return;
-    if (!this.buildTileType || this.buildTileType === 'interact') return;
+
+    if (this.buildTileType === 'ammo') {
+      const { x, z } = this.hoveredTile.userData;
+      const ammoBlock = this.blocks.find(b => b.type === 'ammo');
+      if (ammoBlock) {
+        this.worldGrid.placeBlock(ammoBlock, x, z);
+      }
+      return;
+    }
 
     // Delegate tile placement to WorldGrid
     this.worldGrid.placeTile(this.hoveredTile, this.buildTileType);

@@ -12,7 +12,8 @@ const TOOLS = [
 
 const TILES = [
   new Tile('road', process.env.PUBLIC_URL + '/assets/tiles/road.png', 'Road', process.env.PUBLIC_URL + '/assets/tiles/road.png'),
-  new Tile('grass', process.env.PUBLIC_URL + '/assets/tiles/grass.png', 'Grass', process.env.PUBLIC_URL + '/assets/tiles/grass.png')
+  new Tile('grass', process.env.PUBLIC_URL + '/assets/tiles/grass.png', 'Grass', process.env.PUBLIC_URL + '/assets/tiles/grass.png'),
+  new Tile('ammo', process.env.PUBLIC_URL + '/assets/blocks/ammo-icon.png', 'Ammo Block', process.env.PUBLIC_URL + '/assets/blocks/paper ammo factory.jpg')
 ];
 
 const BUILD_MENU_TILES = TILES;
