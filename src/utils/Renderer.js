@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import Tile from './Tile';
-import WorldGrid from './WorldGrid';
+import Tile from '../components/Tile';
+import WorldGrid from '../grid/WorldGrid';
 
 // Renderer class: loads and displays a GLB model
 export default class Renderer {
@@ -116,8 +116,8 @@ export default class Renderer {
     const tileCount = 40;
     const tileSize = 1;
     const tiles = [
-      new Tile('grass', '', '', process.env.PUBLIC_URL + '/tiles/grass.png'),
-      new Tile('road', '', '', process.env.PUBLIC_URL + '/tiles/road.png'),
+      new Tile('grass', '', '', process.env.PUBLIC_URL + '/assets/tiles/grass.png'),
+      new Tile('road', '', '', process.env.PUBLIC_URL + '/assets/tiles/road.png'),
     ];
 
     this.worldGrid = new WorldGrid(this.scene, tileCount, tileSize, tiles);

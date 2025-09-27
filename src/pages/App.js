@@ -1,18 +1,18 @@
-import './App.css';
-import Renderer from './Renderer';
-import Hotbar from './Hotbar';
-import Tile from './Tile';
-import Tool from './Tool';
+import '../styles/App.css';
+import Renderer from '../utils/Renderer';
+import Hotbar from '../components/Hotbar';
+import Tile from '../components/Tile';
+import Tool from '../components/Tool';
 
 import { useEffect, useRef, useState } from 'react';
 
 const TOOLS = [
-  new Tool('interact', process.env.PUBLIC_URL + '/tiles/interact.png', 'Interact Tool')
+  new Tool('interact', process.env.PUBLIC_URL + '/assets/tiles/interact.png', 'Interact Tool')
 ];
 
 const TILES = [
-  new Tile('road', process.env.PUBLIC_URL + '/tiles/road.png', 'Road', process.env.PUBLIC_URL + '/tiles/road.png'),
-  new Tile('grass', process.env.PUBLIC_URL + '/tiles/grass.png', 'Grass', process.env.PUBLIC_URL + '/tiles/grass.png')
+  new Tile('road', process.env.PUBLIC_URL + '/assets/tiles/road.png', 'Road', process.env.PUBLIC_URL + '/assets/tiles/road.png'),
+  new Tile('grass', process.env.PUBLIC_URL + '/assets/tiles/grass.png', 'Grass', process.env.PUBLIC_URL + '/assets/tiles/grass.png')
 ];
 
 const BUILD_MENU_TILES = TILES;
