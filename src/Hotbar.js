@@ -12,17 +12,6 @@ const Hotbar = ({ blocks, buildMenuOpen, setBuildMenuOpen, selectedTile, setSele
   const [selectedHotbar, setSelectedHotbar] = useState(0);
   const [hotbarHovered, setHotbarHovered] = useState(false);
 
-  // // When a block is selected in build menu, replace current hotbar slot (except slot 0)
-  // const handleBlockSelect = (type) => {
-  //   setHotbar((prev) => {
-  //     if (selectedHotbar === 0) return prev; // Prevent replacing the interact tool in slot 0
-  //     const next = [...prev];
-  //     next[selectedHotbar] = type;
-  //     return next;
-  //   });
-  //   setBuildMenuOpen(false);
-  // };
-
   // Hotbar slot click handler (selects slot)
   const handleHotbarClick = (idx) => {
     setSelectedHotbar(idx);
