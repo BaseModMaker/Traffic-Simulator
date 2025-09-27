@@ -1,5 +1,6 @@
 import './App.css';
 import Renderer from './Renderer';
+import Hotbar from './Hotbar';
 
 import { useEffect, useRef, useState } from 'react';
 
@@ -11,26 +12,12 @@ const BLOCKS = [
 
 const BUILD_MENU_BLOCKS = BLOCKS.filter(b => b.type !== 'interact');
 
-const HOTBAR_SIZE = 10; // 10 slots: 1-9, 0
-
 function App() {
   const rendererContainerRef = useRef(null);
-  // Hotbar: slot 1 = interact, 2 = road, 3 = grass, rest empty (null)
-  const [hotbar, setHotbar] = useState([
-    'interact', // 1
-    'road',     // 2
-    'grass',    // 3
-    'garage',   // 4
-    ...Array(HOTBAR_SIZE - 4).fill(null)
-  ]);
-  const [selectedHotbar, setSelectedHotbar] = useState(0);
   const [buildMenuOpen, setBuildMenuOpen] = useState(false);
   const [highlightLocked, setHighlightLocked] = useState(false);
   const [gridInteractionEnabled, setGridInteractionEnabled] = useState(true);
-  const [hotbarHovered, setHotbarHovered] = useState(false);
-
-  // Set selectedTile to the currently selected hotbar slot
-  const selectedTile = hotbar[selectedHotbar];
+  const [selectedTile, setSelectedTile] = useState('interact'); // Track the selected tile type
 
   // Open build menu with I, close with ESC
   useEffect(() => {
@@ -43,36 +30,15 @@ function App() {
         setBuildMenuOpen((open) => !open);
         setHighlightLocked(false);
       }
-      // Hotbar selection: 1-9 and 0 keys (but do NOT change highlight)
-      // (No-op: handled by click only)
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [buildMenuOpen]);
 
-  // Disable grid interaction when build menu is open or hotbar is hovered
+  // Disable grid interaction when build menu is open
   useEffect(() => {
-    setGridInteractionEnabled(!buildMenuOpen && !hotbarHovered);
-  }, [buildMenuOpen, hotbarHovered]);
-
-  // Update build type in renderer when selected hotbar slot changes
-  useEffect(() => {
-    if (rendererContainerRef.current && rendererContainerRef.current._rendererInstance) {
-      rendererContainerRef.current._rendererInstance.setBuildTileType(selectedTile);
-    }
-  }, [selectedTile]);
-
-  // When a block is selected in build menu, replace current hotbar slot (except slot 0)
-  const handleBlockSelect = (type) => {
-    setHotbar((prev) => {
-      // Prevent replacing the interact tool in slot 0
-      if (selectedHotbar === 0) return prev;
-      const next = [...prev];
-      next[selectedHotbar] = type;
-      return next;
-    });
-    setBuildMenuOpen(false);
-  };
+    setGridInteractionEnabled(!buildMenuOpen);
+  }, [buildMenuOpen]);
 
   // Pass highlight lock state to renderer
   useEffect(() => {
@@ -88,24 +54,19 @@ function App() {
     }
   }, [gridInteractionEnabled]);
 
+  // Pass selected tile type to renderer
+  useEffect(() => {
+    if (rendererContainerRef.current && rendererContainerRef.current._rendererInstance) {
+      rendererContainerRef.current._rendererInstance.setBuildTileType(selectedTile);
+    }
+  }, [selectedTile]);
+
   useEffect(() => {
     const renderer = new Renderer(rendererContainerRef.current);
-    renderer.setBuildTileType?.(selectedTile);
-    renderer.setOpenBuildMenu?.(() => {
-      // No-op: build menu is now opened with I
-    });
-    renderer.setHighlightLocked?.(highlightLocked);
-    renderer.setGridInteractionEnabled?.(gridInteractionEnabled);
     renderer.start();
     return () => renderer.stop();
     // eslint-disable-next-line
   }, []);
-
-  // Hotbar slot click handler (selects slot)
-  const handleHotbarClick = (idx) => {
-    setSelectedHotbar(idx);
-    // No need to setGridInteractionEnabled here, handled by hover logic
-  };
 
   return (
     <div className="App">
@@ -117,7 +78,7 @@ function App() {
               {BUILD_MENU_BLOCKS.map(block => (
                 <div key={block.type} style={{ textAlign: 'center' }}>
                   <button
-                    onClick={() => handleBlockSelect(block.type)}
+                    onClick={() => {}}
                     style={{
                       border: 'none',
                       background: 'transparent',
@@ -134,38 +95,19 @@ function App() {
               ))}
             </div>
             <div style={{ color: '#aaa', fontSize: 14, marginTop: 18 }}>
-              ESC to close • Click to assign to slot {selectedHotbar === 9 ? 0 : selectedHotbar + 1}
-              {selectedHotbar === 0 && <span style={{ color: '#f77', marginLeft: 8 }}>(Interact tool can't be replaced)</span>}
+              ESC to close
             </div>
           </div>
         )}
         <div ref={rendererContainerRef} style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0 }} />
         {/* Hotbar UI */}
-        <div
-          className="hotbar-container"
-          onMouseEnter={() => setHotbarHovered(true)}
-          onMouseLeave={() => setHotbarHovered(false)}
-        >
-          {hotbar.map((type, idx) => {
-            const block = BLOCKS.find(b => b.type === type);
-            return (
-              <div
-                key={idx}
-                className={`hotbar-slot${selectedHotbar === idx ? ' hotbar-slot-selected' : ''}`}
-                onClick={() => handleHotbarClick(idx)}
-              >
-                {block ? (
-                  <>
-                    <img src={block.icon} alt={block.name} className="hotbar-icon" />
-                    <div className="hotbar-slot-num">{idx === 9 ? 0 : idx + 1}</div>
-                  </>
-                ) : (
-                  <div className="hotbar-slot-empty" />
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <Hotbar
+          blocks={BLOCKS}
+          buildMenuOpen={buildMenuOpen}
+          setBuildMenuOpen={setBuildMenuOpen}
+          selectedTile={selectedTile}
+          setSelectedTile={setSelectedTile} // Pass selectedTile state to Hotbar
+        />
       </header>
     </div>
   );
