@@ -158,6 +158,7 @@ export default class Renderer {
   }
 
   _updateCameraPosition() {
+    if (!this.camera) return; // Add null check for camera
     // Spherical to Cartesian
     const { radius, phi, theta } = this.cameraSpherical;
     this.camera.position.x = this.cameraTarget.x + radius * Math.sin(phi) * Math.sin(theta);
@@ -274,12 +275,13 @@ export default class Renderer {
   }
 
   _updateCameraTargetFromKeys() {
+    if (!this.camera) return; // Add null check for camera
     // Pan camera target with arrow keys/WASD
     let dx = 0, dz = 0;
     // Use fractional movement for smoothness
-    if (this.keysPressed['arrowup'] || this.keysPressed['w']) dz -= 1;
+    if (this.keysPressed['arrowup'] || this.keysPressed['z']) dz -= 1;
     if (this.keysPressed['arrowdown'] || this.keysPressed['s']) dz += 1;
-    if (this.keysPressed['arrowleft'] || this.keysPressed['a']) dx -= 1;
+    if (this.keysPressed['arrowleft'] || this.keysPressed['q']) dx -= 1;
     if (this.keysPressed['arrowright'] || this.keysPressed['d']) dx += 1;
     if (dx !== 0 || dz !== 0) {
       // Normalize direction for diagonal movement
