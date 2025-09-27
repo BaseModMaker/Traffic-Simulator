@@ -4,9 +4,9 @@ import Renderer from './Renderer';
 import { useEffect, useRef, useState } from 'react';
 
 const BLOCKS = [
-  { type: 'interact', icon: process.env.PUBLIC_URL + '/blocks/interact.png', name: 'Interact Tool' },
-  { type: 'road', icon: process.env.PUBLIC_URL + '/blocks/road.png', name: 'Road' },
-  { type: 'grass', icon: process.env.PUBLIC_URL + '/blocks/grass.png', name: 'Grass' }
+  { type: 'interact', icon: process.env.PUBLIC_URL + '/tiles/interact.png', name: 'Interact Tool' },
+  { type: 'road', icon: process.env.PUBLIC_URL + '/tiles/road.png', name: 'Road' },
+  { type: 'grass', icon: process.env.PUBLIC_URL + '/tiles/grass.png', name: 'Grass' }
 ];
 
 const BUILD_MENU_BLOCKS = BLOCKS.filter(b => b.type !== 'interact');
@@ -20,7 +20,8 @@ function App() {
     'interact', // 1
     'road',     // 2
     'grass',    // 3
-    ...Array(HOTBAR_SIZE - 3).fill(null)
+    'garage',   // 4
+    ...Array(HOTBAR_SIZE - 4).fill(null)
   ]);
   const [selectedHotbar, setSelectedHotbar] = useState(0);
   const [buildMenuOpen, setBuildMenuOpen] = useState(false);

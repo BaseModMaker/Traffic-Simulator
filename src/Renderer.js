@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // Renderer class: loads and displays a GLB model
 export default class Renderer {
@@ -79,9 +78,6 @@ export default class Renderer {
     // Scene
     this.scene = new THREE.Scene();
 
-    //model scale
-    const modelScale = 20;
-
     // Camera
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -119,7 +115,7 @@ export default class Renderer {
     const loaderTex = new THREE.TextureLoader();
     // Load both textures up front
     loaderTex.load(
-      process.env.PUBLIC_URL + '/blocks/grass.png',
+      process.env.PUBLIC_URL + '/tiles/grass.png',
       (grassTexture) => {
         if (!this.scene) return;
         grassTexture.wrapS = THREE.RepeatWrapping;
@@ -141,7 +137,7 @@ export default class Renderer {
       }
     );
     loaderTex.load(
-      process.env.PUBLIC_URL + '/blocks/road.png',
+      process.env.PUBLIC_URL + '/tiles/road.png',
       (roadTexture) => {
         if (!this.scene) return;
         roadTexture.wrapS = THREE.RepeatWrapping;
@@ -164,23 +160,8 @@ export default class Renderer {
     );
     // --- end grass/road grid ---
 
-    // Load GLB model
-    const loader = new GLTFLoader();
-    loader.load(
-      process.env.PUBLIC_URL + '/cars/police.glb',
-      (gltf) => {
-        if (!this.scene) return; // Guard: scene may be null if stopped early
-        this.model = gltf.scene;
-        // Scale up the model
-        this.model.scale.set(modelScale, modelScale, modelScale);
-        this.scene.add(this.model);
-        this.animate();
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading GLB model:', error);
-      }
-    );
+    // Start animation loop
+    this.animate();
 
     window.addEventListener('resize', this.handleResize);
     window.addEventListener('mousemove', this.handleMouseMove);
@@ -433,10 +414,6 @@ export default class Renderer {
     this.frameId = requestAnimationFrame(this.animate);
     // Smooth camera movement
     this._updateCameraTargetFromKeys();
-    // Rotate the model
-    if (this.model) {
-      this.model.rotation.y += 0.01;
-    }
     if (this.renderer && this.scene && this.camera) {
       this.renderer.render(this.scene, this.camera);
     }
