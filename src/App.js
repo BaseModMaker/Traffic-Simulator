@@ -1,16 +1,21 @@
 import './App.css';
 import Renderer from './Renderer';
 import Hotbar from './Hotbar';
+import Tile from './Tile';
+import Tool from './Tool';
 
 import { useEffect, useRef, useState } from 'react';
 
-const BLOCKS = [
-  { type: 'interact', icon: process.env.PUBLIC_URL + '/tiles/interact.png', name: 'Interact Tool' },
-  { type: 'road', icon: process.env.PUBLIC_URL + '/tiles/road.png', name: 'Road' },
-  { type: 'grass', icon: process.env.PUBLIC_URL + '/tiles/grass.png', name: 'Grass' }
+const TOOLS = [
+  new Tool('interact', process.env.PUBLIC_URL + '/tiles/interact.png', 'Interact Tool')
 ];
 
-const BUILD_MENU_BLOCKS = BLOCKS.filter(b => b.type !== 'interact');
+const TILES = [
+  new Tile('road', process.env.PUBLIC_URL + '/tiles/road.png', 'Road', process.env.PUBLIC_URL + '/tiles/road.png'),
+  new Tile('grass', process.env.PUBLIC_URL + '/tiles/grass.png', 'Grass', process.env.PUBLIC_URL + '/tiles/grass.png')
+];
+
+const BUILD_MENU_TILES = TILES;
 
 function App() {
   const rendererContainerRef = useRef(null);
@@ -79,8 +84,8 @@ function App() {
           <div className="build-menu-center">
             <div style={{ marginBottom: 16, color: '#fff', fontWeight: 'bold', fontSize: 22 }}>Build Menu</div>
             <div style={{ display: 'flex', gap: 32 }}>
-              {BUILD_MENU_BLOCKS.map(block => (
-                <div key={block.type} style={{ textAlign: 'center' }}>
+              {BUILD_MENU_TILES.map(tile => (
+                <div key={tile.type} style={{ textAlign: 'center' }}>
                   <button
                     onClick={() => {}}
                     style={{
@@ -90,11 +95,11 @@ function App() {
                       padding: 4,
                       cursor: 'pointer'
                     }}
-                    title={block.name}
+                    title={tile.name}
                   >
-                    <img src={block.icon} alt={block.name} style={{ width: 64, height: 64, display: 'block' }} />
+                    <img src={tile.icon} alt={tile.name} style={{ width: 64, height: 64, display: 'block' }} />
                   </button>
-                  <div style={{ color: '#fff', marginTop: 6 }}>{block.name}</div>
+                  <div style={{ color: '#fff', marginTop: 6 }}>{tile.name}</div>
                 </div>
               ))}
             </div>
@@ -106,7 +111,7 @@ function App() {
         <div ref={rendererContainerRef} style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0 }} />
         {/* Hotbar UI */}
         <Hotbar
-          blocks={BLOCKS}
+          tiles={[...TOOLS, ...TILES]}
           buildMenuOpen={buildMenuOpen}
           setBuildMenuOpen={setBuildMenuOpen}
           selectedTile={selectedTile}

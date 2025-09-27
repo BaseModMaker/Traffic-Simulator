@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 
 const HOTBAR_SIZE = 10;
 
-const Hotbar = ({ blocks, buildMenuOpen, setBuildMenuOpen, selectedTile, setSelectedTile }) => {
+const Hotbar = ({ tiles, buildMenuOpen, setBuildMenuOpen, selectedTile, setSelectedTile }) => {
   const [hotbar] = useState([
     'interact', // 1
     'road',     // 2
     'grass',    // 3
-    ...Array(HOTBAR_SIZE - 4).fill(null)
+    ...Array(HOTBAR_SIZE - 3).fill(null)
   ]);
   const [selectedHotbar, setSelectedHotbar] = useState(0);
   const [hotbarHovered, setHotbarHovered] = useState(false);
@@ -46,16 +46,16 @@ const Hotbar = ({ blocks, buildMenuOpen, setBuildMenuOpen, selectedTile, setSele
       }}
     >
       {hotbar.map((type, idx) => {
-        const block = blocks.find(b => b.type === type);
+        const tile = tiles.find(t => t.type === type);
         return (
           <div
             key={idx}
             className={`hotbar-slot${selectedHotbar === idx ? ' hotbar-slot-selected' : ''}`}
             onClick={() => handleHotbarClick(idx)}
           >
-            {block ? (
+            {tile ? (
               <>
-                <img src={block.icon} alt={block.name} className="hotbar-icon" />
+                <img src={tile.icon} alt={tile.name} className="hotbar-icon" />
                 <div className="hotbar-slot-num">{idx === 9 ? 0 : idx + 1}</div>
               </>
             ) : (

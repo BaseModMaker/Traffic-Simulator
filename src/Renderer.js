@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import Tile from './Tile';
+import WorldGrid from './WorldGrid';
 
 // Renderer class: loads and displays a GLB model
 export default class Renderer {
@@ -44,6 +46,9 @@ export default class Renderer {
     // Grid interaction state
     this.gridInteractionEnabled = true;
     this.isPlacing = false; // Track if mouse is down for painting
+
+    // Instance of WorldGrid
+    this.worldGrid = null;
   }
 
   setOpenBuildMenu(cb) {
@@ -107,58 +112,17 @@ export default class Renderer {
     directionalLight.position.set(5, 10, 7.5);
     this.scene.add(directionalLight);
 
-    // --- Add grass and road textures/materials ---
+    // --- Initialize the grid ---
     const tileCount = 40;
     const tileSize = 1;
-    const gridSize = tileCount * tileSize;
+    const tiles = [
+      new Tile('grass', '', '', process.env.PUBLIC_URL + '/tiles/grass.png'),
+      new Tile('road', '', '', process.env.PUBLIC_URL + '/tiles/road.png'),
+    ];
 
-    const loaderTex = new THREE.TextureLoader();
-    // Load both textures up front
-    loaderTex.load(
-      process.env.PUBLIC_URL + '/tiles/grass.png',
-      (grassTexture) => {
-        if (!this.scene) return;
-        grassTexture.wrapS = THREE.RepeatWrapping;
-        grassTexture.wrapT = THREE.RepeatWrapping;
-        grassTexture.repeat.set(1, 1);
-        grassTexture.minFilter = THREE.LinearMipMapLinearFilter;
-        grassTexture.magFilter = THREE.NearestFilter;
-        this.textures.grass = grassTexture;
-        this.materials.grass = new THREE.MeshLambertMaterial({ map: grassTexture });
-        this.materials.grassHighlight = new THREE.MeshLambertMaterial({
-          map: grassTexture,
-          side: THREE.DoubleSide,
-          emissive: 0x00ff00,
-          emissiveIntensity: 0.5,
-        });
-
-        // Only build grid after both textures loaded
-        if (this.textures.road !== undefined) this._buildGrid(tileCount, tileSize, gridSize);
-      }
-    );
-    loaderTex.load(
-      process.env.PUBLIC_URL + '/tiles/road.png',
-      (roadTexture) => {
-        if (!this.scene) return;
-        roadTexture.wrapS = THREE.RepeatWrapping;
-        roadTexture.wrapT = THREE.RepeatWrapping;
-        roadTexture.repeat.set(1, 1);
-        roadTexture.minFilter = THREE.LinearMipMapLinearFilter;
-        roadTexture.magFilter = THREE.NearestFilter;
-        this.textures.road = roadTexture;
-        this.materials.road = new THREE.MeshLambertMaterial({ map: roadTexture });
-        this.materials.roadHighlight = new THREE.MeshLambertMaterial({
-          map: roadTexture,
-          side: THREE.DoubleSide,
-          emissive: 0x00ff00,
-          emissiveIntensity: 0.5,
-        });
-
-        // Only build grid after both textures loaded
-        if (this.textures.grass !== undefined) this._buildGrid(tileCount, tileSize, gridSize);
-      }
-    );
-    // --- end grass/road grid ---
+    this.worldGrid = new WorldGrid(this.scene, tileCount, tileSize, tiles);
+    await this.worldGrid.initialize();
+    // --- end grid ---
 
     // Start animation loop
     this.animate();
@@ -173,44 +137,13 @@ export default class Renderer {
     window.addEventListener('keyup', this.handleKeyUp);
   }
 
-  _buildGrid(tileCount, tileSize, gridSize) {
-    // Remove previous tiles if any
-    this.tiles = [];
-    // Remove old meshes from scene
-    if (this.scene) {
-      for (let i = this.scene.children.length - 1; i >= 0; i--) {
-        const obj = this.scene.children[i];
-        if (obj.userData && obj.userData.isTile) {
-          this.scene.remove(obj);
-        }
-      }
-    }
-    for (let x = 0; x < tileCount; x++) {
-      for (let z = 0; z < tileCount; z++) {
-        const geo = new THREE.PlaneGeometry(tileSize, tileSize);
-        const mesh = new THREE.Mesh(geo, this.materials.grass.clone());
-        mesh.position.x = x * tileSize - gridSize / 2 + tileSize / 2;
-        mesh.position.z = z * tileSize - gridSize / 2 + tileSize / 2;
-        mesh.rotation.x = -Math.PI / 2;
-        mesh.userData = {
-          baseMaterial: mesh.material,
-          highlightMaterial: this.materials.grassHighlight.clone(),
-          type: 'grass',
-          isTile: true,
-          x, z
-        };
-        this.scene.add(mesh);
-        this.tiles.push(mesh);
-      }
-    }
-  }
-
   handleClick(event) {
     if (!this.gridInteractionEnabled) return;
-    // Place the selected tile type on the clicked tile
     if (!this.hoveredTile) return;
     if (!this.buildTileType || this.buildTileType === 'interact') return;
-    this._placeTile(this.hoveredTile);
+
+    // Delegate tile placement to WorldGrid
+    this.worldGrid.placeTile(this.hoveredTile, this.buildTileType);
   }
 
   _placeTile(tile) {
@@ -300,7 +233,7 @@ export default class Renderer {
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
     this.raycaster.setFromCamera(this.mouse, this.camera);
-    const intersects = this.raycaster.intersectObjects(this.tiles);
+    const intersects = this.raycaster.intersectObjects(this.worldGrid.getMeshes());
 
     if (this.hoveredTile && (!intersects.length || intersects[0].object !== this.hoveredTile)) {
       // Restore previous tile
@@ -318,7 +251,7 @@ export default class Renderer {
       }
       // Paint while mouse is down
       if (this.isPlacing && this.buildTileType && this.buildTileType !== 'interact') {
-        this._placeTile(tile);
+        this.worldGrid.placeTile(tile, this.buildTileType);
       }
     }
   }
