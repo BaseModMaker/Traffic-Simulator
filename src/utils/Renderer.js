@@ -136,6 +136,9 @@ export default class Renderer {
     const loadableItems = [...blocks, ...stickers].filter(item => typeof item.loadMaterials === 'function');
     await Promise.all(loadableItems.map(item => item.loadMaterials()));
 
+    // Ensure stickers load their materials
+    await Promise.all(stickers.map(sticker => sticker.loadMaterial()));
+
     this.stickers = stickers;
     this.tiles = tiles;
     this.blocks = blocks;

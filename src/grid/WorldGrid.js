@@ -62,7 +62,6 @@ export default class WorldGrid {
     }
 
     this.stickers.set(stickerKey, { mesh });
-    console.log(`Sticker placed at (${x}, ${z})`);
   }
 
   getMeshes() {
