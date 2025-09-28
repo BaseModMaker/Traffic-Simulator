@@ -15,10 +15,12 @@ export default class Sticker {
       loader.load(this.texturePath, resolve, undefined, reject);
     });
 
-    this.material = new THREE.MeshBasicMaterial({
+    this.material = new THREE.MeshStandardMaterial({
       map: texture,
       transparent: true,
-      side: THREE.DoubleSide // show both sides of the plane
+      side: THREE.DoubleSide, // show both sides of the plane
+      roughness: 0.8,         // Adjust roughness for less shine
+      metalness: 0.0          // No metallic effect
     });
   }
 

@@ -27,12 +27,18 @@ export default class Tile {
     texture.minFilter = THREE.LinearMipMapLinearFilter;
     texture.magFilter = THREE.NearestFilter;
 
-    this.material = new THREE.MeshLambertMaterial({ map: texture });
-    this.highlightMaterial = new THREE.MeshLambertMaterial({
+    this.material = new THREE.MeshStandardMaterial({
+      map: texture,
+      roughness: 0.8, // Adjust roughness for less shine
+      metalness: 0.0  // No metallic effect
+    });
+    this.highlightMaterial = new THREE.MeshStandardMaterial({
       map: texture,
       side: THREE.DoubleSide,
       emissive: 0x00ff00,
       emissiveIntensity: 0.5,
+      roughness: 0.8,
+      metalness: 0.0
     });
   }
 

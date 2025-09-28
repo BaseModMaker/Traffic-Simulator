@@ -22,7 +22,11 @@ export default class Block {
       const subTexture = texture.clone();
       subTexture.offset.set(offsetX, offsetY);
       subTexture.repeat.set(size, size);
-      return new THREE.MeshLambertMaterial({ map: subTexture });
+      return new THREE.MeshStandardMaterial({
+        map: subTexture,
+        roughness: 0.8, // Adjust roughness for less shine
+        metalness: 0.0  // No metallic effect
+      });
     });
 
     this.materials = {
