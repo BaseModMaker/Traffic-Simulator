@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import Tile from '../components/Tile';
 import WorldGrid from '../grid/WorldGrid';
 import Block from '../components/Block';
+import Sticker from '../components/Sticker';
 
 // Renderer class: loads and displays a GLB model
 export default class Renderer {
@@ -127,8 +128,15 @@ export default class Renderer {
       new Block('ammo', process.env.PUBLIC_URL + '/assets/blocks/paper ammo factory.jpg'),
       new Block('saloon', process.env.PUBLIC_URL + '/assets/blocks/saloon.jpg')
     ];
-    await Promise.all(blocks.map(block => block.loadMaterials()));
+    const stickers = [
+      new Sticker('child', process.env.PUBLIC_URL + '/assets/stickers/child.png', process.env.PUBLIC_URL + '/assets/stickers/child.png'),
+    ];
 
+    // Ensure only objects with loadMaterials are passed
+    const loadableItems = [...blocks, ...stickers].filter(item => typeof item.loadMaterials === 'function');
+    await Promise.all(loadableItems.map(item => item.loadMaterials()));
+
+    this.stickers = stickers;
     this.tiles = tiles;
     this.blocks = blocks;
     this.worldGrid = new WorldGrid(this.scene, tileCount, tileSize, tiles);
@@ -153,6 +161,22 @@ export default class Renderer {
     if (!this.hoveredTile) return;
 
     const { x, z } = this.hoveredTile.userData;
+
+    // Check if the selected type is a sticker
+    const selectedSticker = this.stickers.find(s => s.type === this.buildTileType);
+    if (selectedSticker) {
+      selectedSticker.createMesh(this.worldGrid.tileSize, x, z, this.worldGrid.gridSize).then(result => {
+        if (!result) {
+          console.error(`Failed to create mesh for sticker "${this.buildTileType}".`);
+          return;
+        }
+
+        const { mesh } = result;
+        this.scene.add(mesh);
+        this.worldGrid.placeSticker(mesh, x, z);
+      });
+      return;
+    }
 
     // Check if the selected type is a block
     const selectedBlock = this.blocks.find(b => b.type === this.buildTileType);

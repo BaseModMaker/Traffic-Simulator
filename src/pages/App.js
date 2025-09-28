@@ -4,6 +4,7 @@ import Hotbar from '../components/Hotbar';
 import Tile from '../components/Tile';
 import Tool from '../components/Tool';
 import Block from '../components/Block';
+import Sticker from '../components/Sticker';
 
 import { useEffect, useRef, useState } from 'react';
 
@@ -21,7 +22,11 @@ const BLOCKS = [
   new Block('saloon', process.env.PUBLIC_URL + '/assets/blocks/saloon.jpg')
 ];
 
-const BUILD_MENU_TILES = [...TILES, ...BLOCKS];
+const STICKERS = [
+  new Sticker('child', process.env.PUBLIC_URL + '/assets/stickers/child.png', process.env.PUBLIC_URL + '/assets/stickers/child.png'),
+];
+
+const BUILD_MENU_TILES = [...TILES, ...BLOCKS, ...STICKERS];
 
 function App() {
   const rendererContainerRef = useRef(null);
@@ -117,7 +122,7 @@ function App() {
         <div ref={rendererContainerRef} style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0 }} />
         {/* Hotbar UI */}
         <Hotbar
-          tiles={[...TOOLS, ...TILES, ...BLOCKS]}
+          tiles={[...TOOLS, ...TILES, ...BLOCKS, ...STICKERS]}
           buildMenuOpen={buildMenuOpen}
           setBuildMenuOpen={setBuildMenuOpen}
           selectedTile={selectedTile}

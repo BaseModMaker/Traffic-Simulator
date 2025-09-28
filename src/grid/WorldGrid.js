@@ -7,6 +7,7 @@ export default class WorldGrid {
     this.tiles = tiles;
     this.gridMeshes = [];
     this.blocks = new Map(); // Track blocks placed on the grid
+    this.stickers = new Map(); // Track stickers placed on the grid
   }
 
   async initialize() {
@@ -50,6 +51,18 @@ export default class WorldGrid {
     const mesh = block.createMesh(this.tileSize, x, z, this.gridSize);
     this.scene.add(mesh);
     this.blocks.set(blockKey, mesh);
+  }
+
+  placeSticker(mesh, x, z) {
+    const stickerKey = `${x},${z}`;
+    if (this.stickers.has(stickerKey)) {
+      const { mesh: existingMesh } = this.stickers.get(stickerKey);
+      this.scene.remove(existingMesh);
+      this.stickers.delete(stickerKey);
+    }
+
+    this.stickers.set(stickerKey, { mesh });
+    console.log(`Sticker placed at (${x}, ${z})`);
   }
 
   getMeshes() {
