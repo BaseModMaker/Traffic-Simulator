@@ -139,6 +139,12 @@ export default class Renderer {
     this.stickers = stickers;
     this.tiles = tiles;
     this.blocks = blocks;
+
+    // Ensure scene is initialized before creating WorldGrid
+    if (!this.scene) {
+      return;
+    }
+
     this.worldGrid = new WorldGrid(this.scene, tileCount, tileSize, tiles);
     await this.worldGrid.initialize();
     // --- end grid ---
