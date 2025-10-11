@@ -1,8 +1,6 @@
 import * as THREE from 'three';
-import Tile from '../components/Tile';
 import WorldGrid from '../grid/WorldGrid';
-import Block from '../components/Block';
-import Sticker from '../components/Sticker';
+import { TILES, BLOCKS, STICKERS } from '../data/Assets';
 
 // Renderer class: loads and displays a GLB model
 export default class Renderer {
@@ -119,18 +117,9 @@ export default class Renderer {
     // --- Initialize the grid ---
     const tileCount = 40;
     const tileSize = 1;
-    const tiles = [
-      new Tile('grass', '', '', process.env.PUBLIC_URL + '/assets/tiles/grass.png'),
-      new Tile('road', '', '', process.env.PUBLIC_URL + '/assets/tiles/road.png'),
-      new Tile('ammo', '', 'Ammo Block', process.env.PUBLIC_URL + '/assets/blocks/paper ammo factory.jpg'),
-    ];
-    const blocks = [
-      new Block('ammo', process.env.PUBLIC_URL + '/assets/blocks/paper ammo factory.jpg'),
-      new Block('saloon', process.env.PUBLIC_URL + '/assets/blocks/saloon.jpg')
-    ];
-    const stickers = [
-      new Sticker('child', process.env.PUBLIC_URL + '/assets/stickers/child.png', process.env.PUBLIC_URL + '/assets/stickers/child.png'),
-    ];
+    const tiles = TILES;
+    const blocks = BLOCKS;
+    const stickers = STICKERS;
 
     // Ensure only objects with loadMaterials are passed
     const loadableItems = [...blocks, ...stickers].filter(item => typeof item.loadMaterials === 'function');

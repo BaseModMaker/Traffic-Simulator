@@ -1,30 +1,10 @@
 import '../styles/App.css';
 import Renderer from '../utils/Renderer';
 import Hotbar from '../components/Hotbar';
-import Tile from '../components/Tile';
-import Tool from '../components/Tool';
-import Block from '../components/Block';
-import Sticker from '../components/Sticker';
 
 import { useEffect, useRef, useState } from 'react';
 
-const TOOLS = [
-  new Tool('interact', process.env.PUBLIC_URL + '/assets/tiles/interact.png', 'Interact Tool')
-];
-
-const TILES = [
-  new Tile('road', process.env.PUBLIC_URL + '/assets/tiles/road.png', 'Road', process.env.PUBLIC_URL + '/assets/tiles/road.png'),
-  new Tile('grass', process.env.PUBLIC_URL + '/assets/tiles/grass.png', 'Grass', process.env.PUBLIC_URL + '/assets/tiles/grass.png')
-];
-
-const BLOCKS = [
-  new Block('ammo', process.env.PUBLIC_URL + '/assets/blocks/ammo-icon.png'),
-  new Block('saloon', process.env.PUBLIC_URL + '/assets/blocks/saloon.jpg')
-];
-
-const STICKERS = [
-  new Sticker('child', process.env.PUBLIC_URL + '/assets/stickers/child.png', process.env.PUBLIC_URL + '/assets/stickers/child.png'),
-];
+import { TOOLS, TILES, BLOCKS, STICKERS } from '../data/Assets';
 
 const BUILD_MENU_TILES = [...TILES, ...BLOCKS, ...STICKERS];
 

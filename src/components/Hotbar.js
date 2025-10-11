@@ -9,7 +9,7 @@ const Hotbar = ({ tiles, buildMenuOpen, setBuildMenuOpen, selectedTile, setSelec
     'grass',    // 3
     'ammo',     // 4
     'saloon',   // 5
-    'child',    // 6 (Sticker)
+    'engineer',    // 6 (Sticker)
     ...Array(HOTBAR_SIZE - 6).fill(null)
   ]);
   const [selectedHotbar, setSelectedHotbar] = useState(0);
