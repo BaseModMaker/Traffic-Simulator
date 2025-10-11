@@ -21,7 +21,7 @@ export default class Sticker {
       transparent: true,
       side: THREE.DoubleSide, // show both sides of the plane
       roughness: 0.8,         // Adjust roughness for less shine
-      metalness: 0.0          // No metallic effect
+      metalness: 0.0,         // No metallic effect
     });
   }
 

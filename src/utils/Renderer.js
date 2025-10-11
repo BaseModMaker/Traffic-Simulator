@@ -102,6 +102,10 @@ export default class Renderer {
     this.renderer.setSize(width, height);
     this.renderer.setClearColor(0x000000, 0);
 
+    // Update tone mapping and color space
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping; // Use ACESFilmicToneMapping for better color contrast
+    this.renderer.outputColorSpace = THREE.LinearSRGBColorSpace; // Use LinearSRGBColorSpace for vivid colors
+
     // Add renderer to container
     if (this.container && this.renderer.domElement && !this.container.contains(this.renderer.domElement)) {
       this.container.appendChild(this.renderer.domElement);
@@ -200,7 +204,6 @@ export default class Renderer {
 
   _updateCameraPosition() {
     if (!this.camera) return; // Add null check for camera
-    // Smoothly interpolate spherical coordinates
     this.cameraSpherical.theta += (this.targetCameraSpherical.theta - this.cameraSpherical.theta) * this.rotationLerpSpeed;
     this.cameraSpherical.phi += (this.targetCameraSpherical.phi - this.cameraSpherical.phi) * this.rotationLerpSpeed;
 
