@@ -1,8 +1,8 @@
 export default class Tool {
-  constructor(type, icon, name) {
+  constructor(type, icon) {
     this.type = type;
     this.icon = icon;
-    this.name = name;
+    this.name = type;
   }
 
   use() {

@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 
 export default class Tile {
-  constructor(type, icon, name, texturePath) {
+  constructor(type, icon) {
     this.type = type;
     this.icon = icon;
-    this.name = name;
-    this.texturePath = texturePath;
+    this.name = type;
+    this.texturePath = icon;
     this.material = null;
     this.highlightMaterial = null;
   }

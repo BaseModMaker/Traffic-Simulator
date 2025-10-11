@@ -9,8 +9,11 @@ const Hotbar = ({ tiles, buildMenuOpen, setBuildMenuOpen, selectedTile, setSelec
     'grass',    // 3
     'ammo',     // 4
     'saloon',   // 5
-    'engineer',    // 6 (Sticker)
-    ...Array(HOTBAR_SIZE - 6).fill(null)
+    'engineer',    // 6
+    'sniper',      // 7
+    'shellback sentinel', // 8
+    'Clankette the Patchsmith', // 9
+    ...Array(HOTBAR_SIZE - 9).fill(null)
   ]);
   const [selectedHotbar, setSelectedHotbar] = useState(0);
   const [hotbarHovered, setHotbarHovered] = useState(false);

@@ -1,9 +1,10 @@
 import * as THREE from 'three'; 
 
 export default class Sticker {
-  constructor(type, icon, texturePath) {
+
+  constructor(type, texturePath) {
     this.type = type;
-    this.icon = icon;
+    this.icon = texturePath
     this.texturePath = texturePath;
     this.material = null;
   }
