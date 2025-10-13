@@ -39,8 +39,8 @@ export default class Interact extends Tool {
             onMoveClick={(sticker) => {
               const { x: currentX, z: currentZ } = tile.userData;
 
-              // Highlight tiles within a 5-tile radius
-              const selectableTiles = window.rendererInstance.worldGrid.getTilesWithinRadius(currentX, currentZ, 5);
+              // Highlight tiles within a radius
+              const selectableTiles = window.rendererInstance.worldGrid.getTilesWithinRadius(currentX, currentZ, 4);
               window.rendererInstance.highlightTiles(selectableTiles, 0x0000ff); // Blue for movement range
 
               // Enable tile selection for movement

@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import Grass from "../gameobjects/tiles/Grass";
 
 export default class WorldGrid {
@@ -10,6 +11,7 @@ export default class WorldGrid {
     this.gridMeshes = [];
     this.blocks = new Map(); // Track blocks placed on the grid
     this.stickers = new Map(); // Track stickers placed on the grid
+    this.debugCircle = null; // Store the debug circle for removal
   }
 
   async initialize() {
@@ -89,10 +91,58 @@ export default class WorldGrid {
   }
 
   getTilesWithinRadius(centerX, centerZ, radius) {
-    return this.gridMeshes.filter(tile => {
+    const tilesWithinRadius = [];
+
+    this.gridMeshes.forEach(tile => {
       const { x, z } = tile.userData;
+
+      // Calculate the distance from the center of the circle
       const distance = Math.sqrt((x - centerX) ** 2 + (z - centerZ) ** 2);
-      return distance <= radius;
+
+      // Include tiles that are inside the circle or along its circumference
+      if (distance <= radius) {
+        tilesWithinRadius.push(tile);
+      }
     });
+
+    // Draw the debug circle and ensure snapped points are included in the highlighted tiles
+    const snappedPoints = this.calculateCircumferenceTiles(centerX, centerZ, radius);
+    snappedPoints.forEach(({ x, z }) => {
+      const tile = this.gridMeshes.find(t => t.userData.x === x && t.userData.z === z);
+      if (tile && !tilesWithinRadius.includes(tile)) {
+        tilesWithinRadius.push(tile); // Add snapped points to the highlighted tiles
+      }
+    });
+
+    return tilesWithinRadius;
+  }
+
+  calculateCircumferenceTiles(centerX, centerZ, radius) {
+    // Create the circle geometry based on highlighted tiles
+    const points = [];
+    const snappedPoints = []; // Store snapped points for inclusion in highlighted tiles
+    const segments = 64; // Number of segments for the circle
+    for (let i = 0; i <= segments; i++) {
+      const angle = (i / segments) * Math.PI * 2;
+      const x = centerX + radius * Math.cos(angle);
+      const z = centerZ + radius * Math.sin(angle);
+
+      // Snap the circle points to the grid
+      const snappedX = Math.round(x);
+      const snappedZ = Math.round(z);
+
+      // Avoid duplicate snapped points
+      if (!snappedPoints.some(p => p.x === snappedX && p.z === snappedZ)) {
+        snappedPoints.push({ x: snappedX, z: snappedZ });
+      }
+
+      points.push(new THREE.Vector3(
+        snappedX * this.tileSize - this.gridSize / 2 + this.tileSize / 2,
+        0.1,
+        snappedZ * this.tileSize - this.gridSize / 2 + this.tileSize / 2
+      ));
+    }
+
+    return snappedPoints; // Return snapped points for inclusion in highlighted tiles
   }
 }
