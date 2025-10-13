@@ -1,7 +1,8 @@
 import Tool from '../../components/Tool';
-import ReactDOM from 'react-dom/client'; // Import createRoot
+import ReactDOM from 'react-dom/client';
 import InteractionButtons from '../../components/InteractionButtons';
-import * as THREE from 'three'; // Import THREE
+import * as THREE from 'three';
+import { moveSticker } from '../../utils/StickerMovement';
 
 export default class Interact extends Tool {
   constructor() {
@@ -53,37 +54,12 @@ export default class Interact extends Tool {
                     z * window.rendererInstance.worldGrid.tileSize - window.rendererInstance.worldGrid.gridSize / 2 + window.rendererInstance.worldGrid.tileSize / 2
                   );
 
-                  const duration = 1; // Animation duration in seconds
-                  const easeInOut = (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // EaseInOut function
-                  const bellCurve = (t) => Math.sin(Math.PI * t) * 0.5; // Bell curve for vertical trajectory
-
-                  let elapsedTime = 0;
-                  const clock = new THREE.Clock();
-
-                  const animate = () => {
-                    const delta = clock.getDelta();
-                    elapsedTime += delta;
-                    const t = Math.min(elapsedTime / duration, 1); // Normalized time (0 to 1)
-
-                    const easedT = easeInOut(t); // Apply easeInOut curve
-                    const bellOffset = bellCurve(t); // Apply bell curve for vertical offset
-
-                    // Interpolate position
-                    mesh.position.lerpVectors(startPosition, endPosition, easedT);
-                    mesh.position.y += bellOffset; // Add vertical offset
-
-                    if (t < 1) {
-                      requestAnimationFrame(animate);
-                    } else {
-                      // Cleanup after animation finishes
-                      window.rendererInstance.worldGrid.stickers.delete(oldStickerKey);
-                      window.rendererInstance.worldGrid.stickers.set(stickerKey, { mesh });
-                      selectedTile.userData.sticker = { name: sticker.name };
-                      tile.userData.sticker = null;
-                    }
-                  };
-
-                  animate();
+                  moveSticker(mesh, startPosition, endPosition, 1, () => {
+                    window.rendererInstance.worldGrid.stickers.delete(oldStickerKey);
+                    window.rendererInstance.worldGrid.stickers.set(stickerKey, { mesh });
+                    selectedTile.userData.sticker = { name: sticker.name };
+                    tile.userData.sticker = null;
+                  });
                 }
 
                 root.unmount(); // Unmount the React component
