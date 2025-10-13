@@ -5,7 +5,6 @@ export default class Sticker {
   constructor(name) {
     this.name = name.toLowerCase();
     this.image = process.env.PUBLIC_URL + '/assets/stickers/' + this.name + '.png';
-    console.log(`Sticker created: ${this.name}, image path: ${this.image}`);
     this.material = null;
   }
 
