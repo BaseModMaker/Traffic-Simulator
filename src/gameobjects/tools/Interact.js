@@ -15,6 +15,7 @@ export default class Interact extends Tool {
     if (buttonContainer) {
       ReactDOM.createRoot(buttonContainer).unmount(); // Unmount the React component
       buttonContainer.remove();
+      window.rendererInstance?.setGridInteractionEnabled(true); // Re-enable grid interaction
     }
 
     if (tile) {
@@ -25,9 +26,24 @@ export default class Interact extends Tool {
         buttonContainer.id = buttonContainerId;
         document.body.appendChild(buttonContainer);
 
+        // Disable grid interaction
+        window.rendererInstance?.setGridInteractionEnabled(false);
+
         // Render the InteractionButtons component
         const root = ReactDOM.createRoot(buttonContainer);
-        root.render(<InteractionButtons />);
+        root.render(
+          <InteractionButtons
+            onMoveClick={() => {
+              // Enable tile selection for movement
+              window.rendererInstance?.enableMoveMode((selectedTile) => {
+                console.log(`Tile clicked: (${selectedTile.userData.x}, ${selectedTile.userData.z})`);
+                root.unmount(); // Unmount the React component
+                buttonContainer.remove(); // Remove the button container
+                window.rendererInstance?.setGridInteractionEnabled(true); // Re-enable grid interaction
+              });
+            }}
+          />
+        );
       }
     }
   }

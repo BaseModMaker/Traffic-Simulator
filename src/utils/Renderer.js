@@ -55,6 +55,9 @@ export default class Renderer {
 
     // Initialize tools array
     this.tools = TOOLS;
+
+    // Callback for move mode
+    this.moveModeCallback = null;
   }
 
   setOpenBuildMenu(cb) {
@@ -82,6 +85,15 @@ export default class Renderer {
     if (!enabled && this.hoveredTile) {
       this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
       this.hoveredTile = null;
+    }
+  }
+
+  enableMoveMode(callback) {
+    this.moveModeCallback = callback;
+
+    // Apply special highlight effect for move mode
+    if (this.hoveredTile) {
+      this.hoveredTile.material = this.hoveredTile.userData.moveHighlightMaterial;
     }
   }
 
@@ -175,6 +187,13 @@ export default class Renderer {
     if (!this.hoveredTile) return;
 
     const { x, z } = this.hoveredTile.userData;
+
+    // Check if move mode is active
+    if (this.moveModeCallback) {
+      this.moveModeCallback(this.hoveredTile); // Trigger the callback with the clicked tile
+      this.moveModeCallback = null; // Reset move mode
+      return;
+    }
 
     // Check if the selected type is a sticker
     const selectedSticker = this.stickers.find(s => s.name === this.buildTileName);
@@ -285,18 +304,6 @@ export default class Renderer {
 
     if (!this.camera || !this.renderer) return;
 
-    // If highlight is locked, only keep the locked tile highlighted
-    if (this.highlightLocked) {
-      if (this.lockedTile && this.hoveredTile !== this.lockedTile) {
-        if (this.hoveredTile) {
-          this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
-        }
-        this.hoveredTile = this.lockedTile;
-        this.hoveredTile.material = this.hoveredTile.userData.highlightMaterial;
-      }
-      return;
-    }
-
     const rect = this.renderer.domElement.getBoundingClientRect();
     this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -315,7 +322,10 @@ export default class Renderer {
         if (this.hoveredTile) {
           this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
         }
-        tile.material = tile.userData.highlightMaterial;
+        // Apply move highlight material if in move mode
+        tile.material = this.moveModeCallback
+          ? tile.userData.moveHighlightMaterial
+          : tile.userData.highlightMaterial;
         this.hoveredTile = tile;
       }
       // Paint while mouse is down

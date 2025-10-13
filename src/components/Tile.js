@@ -6,6 +6,7 @@ export default class Tile {
     this.image = process.env.PUBLIC_URL + '/assets/tiles/' + this.name + '.png';
     this.material = null;
     this.highlightMaterial = null;
+    this.moveHighlightMaterial = null;
   }
 
   async loadMaterials() {
@@ -38,6 +39,14 @@ export default class Tile {
       roughness: 0.8,
       metalness: 0.0
     });
+    this.moveHighlightMaterial = new THREE.MeshStandardMaterial({
+      map: texture,
+      side: THREE.DoubleSide,
+      emissive: 0x0000ff, // Blue highlight for move mode
+      emissiveIntensity: 0.7,
+      roughness: 0.8,
+      metalness: 0.0
+    });
   }
 
   createMesh(tileSize, x, z, gridSize) {
@@ -50,6 +59,7 @@ export default class Tile {
     mesh.userData = {
       baseMaterial: mesh.material,
       highlightMaterial: this.highlightMaterial.clone(),
+      moveHighlightMaterial: this.moveHighlightMaterial.clone(),
       name: this.name,
       isTile: true,
       x,
