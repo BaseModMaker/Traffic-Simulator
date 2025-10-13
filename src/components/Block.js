@@ -46,6 +46,8 @@ export default class Block {
       this.materials.front, // Front
       this.materials.back, // Back
     ]);
+    mesh.castShadow = true; // Enable casting shadows
+    mesh.receiveShadow = true; // Enable receiving shadows
     mesh.position.set(
       x * tileSize - gridSize / 2 + tileSize / 2,
       tileSize / 2, // Raise cube above the tile

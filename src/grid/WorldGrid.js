@@ -26,6 +26,7 @@ export default class WorldGrid {
       for (let z = 0; z < this.tileCount; z++) {
         const mesh = grassTile.createMesh(this.tileSize, x, z, this.gridSize);
         this.scene.add(mesh);
+        mesh.receiveShadow = true; // Enable receiving shadows for tiles
         this.gridMeshes.push(mesh);
       }
     }

@@ -46,6 +46,7 @@ export default class Tile {
     mesh.position.x = x * tileSize - gridSize / 2 + tileSize / 2;
     mesh.position.z = z * tileSize - gridSize / 2 + tileSize / 2;
     mesh.rotation.x = -Math.PI / 2;
+    mesh.receiveShadow = true; // Enable receiving shadows
     mesh.userData = {
       baseMaterial: mesh.material,
       highlightMaterial: this.highlightMaterial.clone(),

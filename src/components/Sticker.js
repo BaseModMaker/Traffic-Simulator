@@ -19,7 +19,8 @@ export default class Sticker {
     this.material = new THREE.MeshStandardMaterial({
       map: texture,
       transparent: true,
-      side: THREE.DoubleSide, // show both sides of the plane
+      alphaTest: 0.5, // Use alpha channel for shadow shape
+      side: THREE.DoubleSide, // Show both sides of the plane
       roughness: 0.8,         // Adjust roughness for less shine
       metalness: 0.0,         // No metallic effect
     });
@@ -51,6 +52,8 @@ export default class Sticker {
       mesh.lookAt(cameraPosition); // Rotate to face the camera horizontally
     };
 
+    mesh.castShadow = true; // Enable casting shadows
+    mesh.receiveShadow = true; // Enable receiving shadows
     mesh.userData = { name: this.name, x, z };
     return { mesh };
   }

@@ -106,6 +106,9 @@ export default class Renderer {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping; // Use ACESFilmicToneMapping for better color contrast
     this.renderer.outputColorSpace = THREE.LinearSRGBColorSpace; // Use LinearSRGBColorSpace for vivid colors
 
+    this.renderer.shadowMap.enabled = true; // Enable shadow maps
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Use soft shadows
+
     // Add renderer to container
     if (this.container && this.renderer.domElement && !this.container.contains(this.renderer.domElement)) {
       this.container.appendChild(this.renderer.domElement);
@@ -116,6 +119,11 @@ export default class Renderer {
     this.scene.add(ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
     directionalLight.position.set(5, 10, 7.5);
+    directionalLight.castShadow = true; // Enable shadows for the light
+    directionalLight.shadow.mapSize.width = 1024; // Shadow map resolution
+    directionalLight.shadow.mapSize.height = 1024;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 50;
     this.scene.add(directionalLight);
 
     // --- Initialize the grid ---
