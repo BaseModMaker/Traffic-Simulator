@@ -74,10 +74,7 @@ export default class Renderer {
     this.highlightLocked = locked;
     if (!locked) {
       this.lockedTile = null;
-      if (this.hoveredTile) {
-        this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
-        this.hoveredTile = null;
-      }
+      this.hoveredTile = null;
     }
   }
 
@@ -87,9 +84,7 @@ export default class Renderer {
 
   setGridInteractionEnabled(enabled) {
     this.gridInteractionEnabled = enabled;
-    // Remove highlight if disabling interaction
-    if (!enabled && this.hoveredTile) {
-      this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
+    if (!enabled) {
       this.hoveredTile = null;
     }
   }

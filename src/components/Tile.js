@@ -5,9 +5,6 @@ export default class Tile {
     this.name = name.toLowerCase();
     this.image = process.env.PUBLIC_URL + '/assets/tiles/' + this.name + '.png';
     this.material = null;
-    this.highlightMaterial = null;
-    this.moveHighlightMaterial = null;
-    this.outOfRangeHighlightMaterial = null;
   }
 
   async loadMaterials() {
@@ -32,30 +29,6 @@ export default class Tile {
       roughness: 0.8, // Adjust roughness for less shine
       metalness: 0.0  // No metallic effect
     });
-    this.highlightMaterial = new THREE.MeshStandardMaterial({
-      map: texture,
-      side: THREE.DoubleSide,
-      emissive: 0x00ff00,
-      emissiveIntensity: 0.5,
-      roughness: 0.8,
-      metalness: 0.0
-    });
-    this.moveHighlightMaterial = new THREE.MeshStandardMaterial({
-      map: texture,
-      side: THREE.DoubleSide,
-      emissive: 0x0000ff, // Blue highlight for move mode
-      emissiveIntensity: 0.7,
-      roughness: 0.8,
-      metalness: 0.0
-    });
-    this.outOfRangeHighlightMaterial = new THREE.MeshStandardMaterial({
-      map: texture,
-      side: THREE.DoubleSide,
-      emissive: new THREE.Color(1, 0, 0), // Red highlight for out-of-range tiles
-      emissiveIntensity: 0.7,
-      roughness: 0.8,
-      metalness: 0.0
-    });
   }
 
   createMesh(tileSize, x, z, gridSize) {
@@ -67,9 +40,6 @@ export default class Tile {
     mesh.receiveShadow = true; // Enable receiving shadows
     mesh.userData = {
       baseMaterial: mesh.material,
-      highlightMaterial: this.highlightMaterial.clone(),
-      moveHighlightMaterial: this.moveHighlightMaterial.clone(),
-      outOfRangeHighlightMaterial: this.outOfRangeHighlightMaterial.clone(),
       name: this.name,
       isTile: true,
       x,

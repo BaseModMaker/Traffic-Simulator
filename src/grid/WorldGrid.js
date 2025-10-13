@@ -49,7 +49,6 @@ export default class WorldGrid {
     // Apply the tile material
     mesh.material = tile.material.clone();
     mesh.userData.baseMaterial = tile.material.clone();
-    mesh.userData.highlightMaterial = tile.highlightMaterial.clone();
     mesh.userData.name = tile.name;
   }
 
