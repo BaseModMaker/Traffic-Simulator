@@ -33,10 +33,31 @@ export default class Interact extends Tool {
         const root = ReactDOM.createRoot(buttonContainer);
         root.render(
           <InteractionButtons
-            onMoveClick={() => {
+            sticker={sticker} // Pass sticker data
+            onMoveClick={(sticker) => {
               // Enable tile selection for movement
               window.rendererInstance?.enableMoveMode((selectedTile) => {
-                console.log(`Tile clicked: (${selectedTile.userData.x}, ${selectedTile.userData.z})`);
+                const { x, z } = selectedTile.userData;
+
+                // Move the sticker to the new tile
+                const stickerKey = `${x},${z}`;
+                const oldStickerKey = `${tile.userData.x},${tile.userData.z}`;
+                const mesh = window.rendererInstance.worldGrid.stickers.get(oldStickerKey)?.mesh;
+
+                if (mesh) {
+                  mesh.position.set(
+                    x * window.rendererInstance.worldGrid.tileSize - window.rendererInstance.worldGrid.gridSize / 2 + window.rendererInstance.worldGrid.tileSize / 2,
+                    mesh.position.y,
+                    z * window.rendererInstance.worldGrid.tileSize - window.rendererInstance.worldGrid.gridSize / 2 + window.rendererInstance.worldGrid.tileSize / 2
+                  );
+
+                  // Update sticker references in the grid
+                  window.rendererInstance.worldGrid.stickers.delete(oldStickerKey);
+                  window.rendererInstance.worldGrid.stickers.set(stickerKey, { mesh });
+                  selectedTile.userData.sticker = { name: sticker.name };
+                  tile.userData.sticker = null;
+                }
+
                 root.unmount(); // Unmount the React component
                 buttonContainer.remove(); // Remove the button container
                 window.rendererInstance?.setGridInteractionEnabled(true); // Re-enable grid interaction

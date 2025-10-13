@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/InteractionButtons.css';
 
-const InteractionButtons = ({ onMoveClick }) => {
+const InteractionButtons = ({ onMoveClick, sticker }) => {
   const handleMouseEnter = () => {
     window.rendererInstance?.setGridInteractionEnabled(false); // Disable grid interaction
   };
@@ -21,7 +21,10 @@ const InteractionButtons = ({ onMoveClick }) => {
           Attack {i}
         </button>
       ))}
-      <button className="interaction-button move-button" onClick={onMoveClick}>
+      <button
+        className="interaction-button move-button"
+        onClick={() => onMoveClick(sticker)} // Pass sticker data
+      >
         Move
       </button>
     </div>
