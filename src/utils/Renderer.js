@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import WorldGrid from '../grid/WorldGrid';
-import { TILES, BLOCKS, STICKERS } from '../data/Assets';
+import { TILES, BLOCKS, STICKERS, TOOLS } from '../data/Assets';
+import Grass from '../gameobjects/tiles/Grass';
 
 // Renderer class: loads and displays a GLB model
 export default class Renderer {
@@ -18,7 +19,7 @@ export default class Renderer {
     this.handleResize = this.handleResize.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleClick = this.handleClick.bind(this);
-    this.buildTileName = 'grass';
+    this.buildTileName = Grass.name.toLowerCase(); // Default to grass tile
     this.textures = {};
     this.materials = {};
     this.cameraZoomSpeed = 0.1;
@@ -51,6 +52,9 @@ export default class Renderer {
 
     // Instance of WorldGrid
     this.worldGrid = null;
+
+    // Initialize tools array
+    this.tools = TOOLS;
   }
 
   setOpenBuildMenu(cb) {
@@ -195,6 +199,14 @@ export default class Renderer {
       return;
     }
 
+    // Check if the selected tool is "interact"
+    const selectedTool = this.buildTileName === 'interact';
+    if (selectedTool) {
+      const tool = this.tools.find(t => t.name === 'interact');
+      tool?.use(this.hoveredTile); // Call the use method of the Interact tool
+      return;
+    }
+
     // Delegate tile placement to WorldGrid
     this.worldGrid.placeTile(this.hoveredTile, this.buildTileName);
   }
@@ -325,7 +337,7 @@ export default class Renderer {
   handleKeyDown(event) {
     this.keysPressed[event.key.toLowerCase()] = true;
     // Rotate camera with A and E keys
-    if (event.key.toLowerCase() === 'a' || event.key === 'Shift') {
+    if (event.key.toLowerCase() === 'a' || event.key === 'shift') {
         this.targetCameraSpherical.theta -= this.cameraRotateSpeed * 10;
     }
     if (event.key.toLowerCase() === 'e' || event.key === '1') {

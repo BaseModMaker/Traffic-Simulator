@@ -1,3 +1,5 @@
+import Grass from "../gameobjects/tiles/Grass";
+
 export default class WorldGrid {
   constructor(scene, tileCount, tileSize, tiles) {
     this.scene = scene;
@@ -15,7 +17,7 @@ export default class WorldGrid {
     await Promise.all(this.tiles.map(tile => tile.loadMaterials()));
 
     // Find the grass tile
-    const grassTile = this.tiles.find(tile => tile.name === 'grass');
+    const grassTile = this.tiles.find(tile => tile.name === Grass.name.toLowerCase());
     if (!grassTile) {
       console.error('Grass tile not found in the tiles array.');
       return;
@@ -58,6 +60,12 @@ export default class WorldGrid {
     const mesh = block.createMesh(this.tileSize, x, z, this.gridSize);
     this.scene.add(mesh);
     this.blocks.set(blockKey, mesh);
+
+    // Update the tile's userData with the block reference
+    const tile = this.gridMeshes.find(t => t.userData.x === x && t.userData.z === z);
+    if (tile) {
+      tile.userData.block = block;
+    }
   }
 
   placeSticker(mesh, x, z) {
@@ -69,6 +77,12 @@ export default class WorldGrid {
     }
 
     this.stickers.set(stickerKey, { mesh });
+
+    // Update the tile's userData with the sticker reference
+    const tile = this.gridMeshes.find(t => t.userData.x === x && t.userData.z === z);
+    if (tile) {
+      tile.userData.sticker = { name: mesh.userData.name };
+    }
   }
 
   getMeshes() {
