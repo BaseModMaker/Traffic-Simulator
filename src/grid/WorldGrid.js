@@ -88,4 +88,12 @@ export default class WorldGrid {
   getMeshes() {
     return this.gridMeshes;
   }
+
+  getTilesWithinRadius(centerX, centerZ, radius) {
+    return this.gridMeshes.filter(tile => {
+      const { x, z } = tile.userData;
+      const distance = Math.sqrt((x - centerX) ** 2 + (z - centerZ) ** 2);
+      return distance <= radius;
+    });
+  }
 }

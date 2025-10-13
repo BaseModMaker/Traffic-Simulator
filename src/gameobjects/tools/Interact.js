@@ -37,6 +37,12 @@ export default class Interact extends Tool {
           <InteractionButtons
             sticker={sticker} // Pass sticker data
             onMoveClick={(sticker) => {
+              const { x: currentX, z: currentZ } = tile.userData;
+
+              // Highlight tiles within a 5-tile radius
+              const selectableTiles = window.rendererInstance.worldGrid.getTilesWithinRadius(currentX, currentZ, 5);
+              window.rendererInstance.highlightTiles(selectableTiles, 0x0000ff); // Blue for movement range
+
               // Enable tile selection for movement
               window.rendererInstance?.enableMoveMode((selectedTile) => {
                 const { x, z } = selectedTile.userData;
@@ -65,6 +71,7 @@ export default class Interact extends Tool {
                 root.unmount(); // Unmount the React component
                 buttonContainer.remove(); // Remove the button container
                 window.rendererInstance?.setGridInteractionEnabled(true); // Re-enable grid interaction
+                window.rendererInstance.clearHighlightedTiles(); // Clear highlighted tiles
               });
             }}
           />

@@ -7,6 +7,7 @@ export default class Tile {
     this.material = null;
     this.highlightMaterial = null;
     this.moveHighlightMaterial = null;
+    this.outOfRangeHighlightMaterial = null;
   }
 
   async loadMaterials() {
@@ -47,6 +48,14 @@ export default class Tile {
       roughness: 0.8,
       metalness: 0.0
     });
+    this.outOfRangeHighlightMaterial = new THREE.MeshStandardMaterial({
+      map: texture,
+      side: THREE.DoubleSide,
+      emissive: new THREE.Color(1, 0, 0), // Red highlight for out-of-range tiles
+      emissiveIntensity: 0.7,
+      roughness: 0.8,
+      metalness: 0.0
+    });
   }
 
   createMesh(tileSize, x, z, gridSize) {
@@ -60,6 +69,7 @@ export default class Tile {
       baseMaterial: mesh.material,
       highlightMaterial: this.highlightMaterial.clone(),
       moveHighlightMaterial: this.moveHighlightMaterial.clone(),
+      outOfRangeHighlightMaterial: this.outOfRangeHighlightMaterial.clone(),
       name: this.name,
       isTile: true,
       x,

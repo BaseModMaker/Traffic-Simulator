@@ -58,6 +58,12 @@ export default class Renderer {
 
     // Callback for move mode
     this.moveModeCallback = null;
+
+    // Highlighted tiles state
+    this.highlightedTiles = null;
+
+    // Overlay for mouse hover
+    this.hoverOverlay = null;
   }
 
   setOpenBuildMenu(cb) {
@@ -95,6 +101,38 @@ export default class Renderer {
     if (this.hoveredTile) {
       this.hoveredTile.material = this.hoveredTile.userData.moveHighlightMaterial;
     }
+  }
+
+  highlightTiles(tiles, color = 0x0000ff) {
+    this.clearHighlightedTiles(); // Clear existing highlights first
+    this.highlightedTiles = tiles.map(tile => {
+      const overlay = this._createHighlightOverlay(tile, color);
+      this.scene.add(overlay);
+      return overlay;
+    });
+  }
+
+  clearHighlightedTiles() {
+    if (this.highlightedTiles) {
+      this.highlightedTiles.forEach(overlay => {
+        this.scene.remove(overlay);
+      });
+      this.highlightedTiles = null;
+    }
+  }
+
+  _createHighlightOverlay(tile, color) {
+    const geometry = new THREE.PlaneGeometry(this.worldGrid.tileSize, this.worldGrid.tileSize);
+    const material = new THREE.MeshBasicMaterial({
+      color,
+      opacity: 0.5,
+      transparent: true,
+      depthWrite: false, // Ensure it renders on top
+    });
+    const overlay = new THREE.Mesh(geometry, material);
+    overlay.position.set(tile.position.x, tile.position.y + 0.01, tile.position.z); // Slightly above the tile
+    overlay.rotation.x = -Math.PI / 2; // Align with the grid
+    return overlay;
   }
 
   async init() {
@@ -183,8 +221,8 @@ export default class Renderer {
   }
 
   handleClick(event) {
-    if (!this.gridInteractionEnabled) return;
-    if (!this.hoveredTile) return;
+    if (!this.gridInteractionEnabled) return; // Prevent interaction if grid interaction is disabled
+    if (!this.hoveredTile) return; // Ensure a tile is hovered over before proceeding
 
     const { x, z } = this.hoveredTile.userData;
 
@@ -280,9 +318,9 @@ export default class Renderer {
 
   handleMouseMove(event) {
     if (!this.gridInteractionEnabled) {
-      if (this.hoveredTile) {
-        this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
-        this.hoveredTile = null;
+      if (this.hoverOverlay) {
+        this.scene.remove(this.hoverOverlay);
+        this.hoverOverlay = null;
       }
       return;
     }
@@ -311,27 +349,26 @@ export default class Renderer {
     this.raycaster.setFromCamera(this.mouse, this.camera);
     const intersects = this.raycaster.intersectObjects(this.worldGrid.getMeshes());
 
-    if (this.hoveredTile && (!intersects.length || intersects[0].object !== this.hoveredTile)) {
-      // Restore previous tile
-      this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
-      this.hoveredTile = null;
+    if (this.hoverOverlay) {
+      this.scene.remove(this.hoverOverlay); // Remove the previous hover overlay
+      this.hoverOverlay = null;
     }
+
     if (intersects.length) {
       const tile = intersects[0].object;
-      if (this.hoveredTile !== tile) {
-        if (this.hoveredTile) {
-          this.hoveredTile.material = this.hoveredTile.userData.baseMaterial;
-        }
-        // Apply move highlight material if in move mode
-        tile.material = this.moveModeCallback
-          ? tile.userData.moveHighlightMaterial
-          : tile.userData.highlightMaterial;
-        this.hoveredTile = tile;
-      }
-      // Paint while mouse is down
-      if (this.isPlacing && this.buildTileName && this.buildTileName !== 'interact') {
-        this.worldGrid.placeTile(tile, this.buildTileName);
-      }
+
+      // Create a hover overlay
+      const color = this.moveModeCallback && this.highlightedTiles && !this.highlightedTiles.some(overlay => overlay.position.equals(tile.position))
+        ? 0xff0000 // Red for out-of-range tiles
+        : 0x00ff00; // Green for in-range tiles or default hover
+
+      this.hoverOverlay = this._createHighlightOverlay(tile, color);
+      this.scene.add(this.hoverOverlay);
+
+      // Update the hovered tile reference
+      this.hoveredTile = tile;
+    } else {
+      this.hoveredTile = null; // Clear the hovered tile if no intersection
     }
   }
 
