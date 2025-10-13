@@ -357,11 +357,17 @@ export default class Renderer {
     if (intersects.length) {
       const tile = intersects[0].object;
 
-      // Create a hover overlay
-      const color = this.moveModeCallback && this.highlightedTiles && !this.highlightedTiles.some(overlay => overlay.position.equals(tile.position))
-        ? 0xff0000 // Red for out-of-range tiles
-        : 0x00ff00; // Green for in-range tiles or default hover
+      // Determine the hover overlay color
+      let color = 0x00ff00; // Default green for in-range tiles
+      if (this.moveModeCallback) {
+        const isInRange = this.highlightedTiles?.some(overlay => {
+          const overlayPosition = overlay.position;
+          return overlayPosition.x === tile.position.x && overlayPosition.z === tile.position.z;
+        });
+        color = isInRange ? 0x0000ff : 0xff0000; // Blue for in-range, red for out-of-range
+      }
 
+      // Create and add the hover overlay
       this.hoverOverlay = this._createHighlightOverlay(tile, color);
       this.scene.add(this.hoverOverlay);
 
