@@ -15,7 +15,7 @@ export default class WorldGrid {
     await Promise.all(this.tiles.map(tile => tile.loadMaterials()));
 
     // Find the grass tile
-    const grassTile = this.tiles.find(tile => tile.type === 'grass');
+    const grassTile = this.tiles.find(tile => tile.name === 'grass');
     if (!grassTile) {
       console.error('Grass tile not found in the tiles array.');
       return;
@@ -31,8 +31,8 @@ export default class WorldGrid {
     }
   }
 
-  placeTile(mesh, tileType) {
-    const tile = this.tiles.find(t => t.type === tileType);
+  placeTile(mesh, tileName) {
+    const tile = this.tiles.find(t => t.name === tileName);
     if (!tile) return;
 
     // Remove any block on this tile
@@ -47,7 +47,7 @@ export default class WorldGrid {
     mesh.material = tile.material.clone();
     mesh.userData.baseMaterial = tile.material.clone();
     mesh.userData.highlightMaterial = tile.highlightMaterial.clone();
-    mesh.userData.type = tile.type;
+    mesh.userData.name = tile.name;
   }
 
   placeBlock(block, x, z) {

@@ -53,7 +53,7 @@ function App() {
   // Pass selected tile type to renderer
   useEffect(() => {
     if (rendererContainerRef.current && rendererContainerRef.current._rendererInstance) {
-      rendererContainerRef.current._rendererInstance.setBuildTileType(selectedTile);
+      rendererContainerRef.current._rendererInstance.setBuildTileName(selectedTile);
     }
   }, [selectedTile]);
 
@@ -76,7 +76,7 @@ function App() {
             <div style={{ marginBottom: 16, color: '#fff', fontWeight: 'bold', fontSize: 22 }}>Build Menu</div>
             <div style={{ display: 'flex', gap: 32 }}>
               {BUILD_MENU_TILES.map(tile => (
-                <div key={tile.type} style={{ textAlign: 'center' }}>
+                <div key={tile.name} style={{ textAlign: 'center' }}>
                   <button
                     onClick={() => {}}
                     style={{

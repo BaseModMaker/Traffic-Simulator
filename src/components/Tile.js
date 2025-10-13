@@ -1,11 +1,9 @@
 import * as THREE from 'three';
 
 export default class Tile {
-  constructor(type, icon) {
-    this.type = type;
-    this.icon = icon;
-    this.name = type;
-    this.texturePath = icon;
+  constructor(name) {
+    this.name = name.toLowerCase();
+    this.image = process.env.PUBLIC_URL + '/assets/tiles/' + this.name + '.png';
     this.material = null;
     this.highlightMaterial = null;
   }
@@ -14,7 +12,7 @@ export default class Tile {
     const loader = new THREE.TextureLoader();
     const texture = await new Promise((resolve, reject) => {
       loader.load(
-        this.texturePath,
+        this.image,
         resolve,
         undefined,
         reject
@@ -51,7 +49,7 @@ export default class Tile {
     mesh.userData = {
       baseMaterial: mesh.material,
       highlightMaterial: this.highlightMaterial.clone(),
-      type: this.type,
+      name: this.name,
       isTile: true,
       x,
       z,

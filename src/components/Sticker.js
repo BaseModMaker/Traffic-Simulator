@@ -2,10 +2,10 @@ import * as THREE from 'three';
 
 export default class Sticker {
 
-  constructor(type, texturePath) {
-    this.type = type;
-    this.icon = texturePath
-    this.texturePath = texturePath;
+  constructor(name) {
+    this.name = name.toLowerCase();
+    this.image = process.env.PUBLIC_URL + '/assets/stickers/' + this.name + '.png';
+    console.log(`Sticker created: ${this.name}, image path: ${this.image}`);
     this.material = null;
   }
 
@@ -13,7 +13,7 @@ export default class Sticker {
     if (this.material) return;
     const loader = new THREE.TextureLoader();
     const texture = await new Promise((resolve, reject) => {
-      loader.load(this.texturePath, resolve, undefined, reject);
+      loader.load(this.image, resolve, undefined, reject);
     });
 
     this.material = new THREE.MeshStandardMaterial({
@@ -27,7 +27,7 @@ export default class Sticker {
 
   async createMesh(tileSize, x, z, gridSize) {
     if (!this.material) {
-      console.error(`Material for sticker "${this.type}" is not loaded. Ensure loadMaterial() is called and awaited.`);
+      console.error(`Material for sticker "${this.name}" is not loaded. Ensure loadMaterial() is called and awaited.`);
       await this.loadMaterial();
     }
 
@@ -51,7 +51,7 @@ export default class Sticker {
       mesh.lookAt(cameraPosition); // Rotate to face the camera horizontally
     };
 
-    mesh.userData = { type: this.type, x, z };
+    mesh.userData = { name: this.name, x, z };
     return { mesh };
   }
 }

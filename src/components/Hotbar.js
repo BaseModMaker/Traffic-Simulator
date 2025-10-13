@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import Interact from '../gameobjects/tools/Interact';
+import Road from '../gameobjects/tiles/Road';
+import Grass from '../gameobjects/tiles/Grass';
+import Ammo from '../gameobjects/blocks/Ammo';
+import Saloon from '../gameobjects/blocks/Saloon';
+import Engineer from '../gameobjects/stickers/Engineer';
+import Sniper from '../gameobjects/stickers/Sniper';
+import Shellback_Sentinel from '../gameobjects/stickers/ShellbackSentinel';
+import Clankette_The_Patchsmith from '../gameobjects/stickers/ClanketteThePatchsmith';
 
 const HOTBAR_SIZE = 10;
 
 const Hotbar = ({ tiles, buildMenuOpen, setBuildMenuOpen, selectedTile, setSelectedTile }) => {
   const [hotbar] = useState([
-    'interact', // 1
-    'road',     // 2
-    'grass',    // 3
-    'ammo',     // 4
-    'saloon',   // 5
-    'engineer',    // 6
-    'sniper',      // 7
-    'shellback sentinel', // 8
-    'Clankette the Patchsmith', // 9
+    Interact.name.toLowerCase(), // 1
+    Road.name.toLowerCase(),     // 2
+    Grass.name.toLowerCase(),    // 3
+    Ammo.name.toLowerCase(),     // 4
+    Saloon.name.toLowerCase(),   // 5
+    Engineer.name.toLowerCase(), // 6
+    Sniper.name.toLowerCase(),   // 7
+    Shellback_Sentinel.name.toLowerCase(), // 8
+    Clankette_The_Patchsmith.name.toLowerCase(), // 9
     ...Array(HOTBAR_SIZE - 9).fill(null)
   ]);
   const [selectedHotbar, setSelectedHotbar] = useState(0);
@@ -52,8 +61,8 @@ const Hotbar = ({ tiles, buildMenuOpen, setBuildMenuOpen, selectedTile, setSelec
         e.stopPropagation(); // Prevent event propagation
       }}
     >
-      {hotbar.map((type, idx) => {
-        const item = tiles.find(t => t.type === type); // Find both tiles and blocks
+      {hotbar.map((name, idx) => {
+        const item = tiles.find(t => t.name === name); // Find both tiles and blocks
         return (
           <div
             key={idx}
@@ -62,7 +71,7 @@ const Hotbar = ({ tiles, buildMenuOpen, setBuildMenuOpen, selectedTile, setSelec
           >
             {item ? (
               <>
-                <img src={item.icon} alt={item.name} className="hotbar-icon" />
+                <img src={item.image} alt={item.name} className="hotbar-icon" />
                 <div className="hotbar-slot-num">{idx === 9 ? 0 : idx + 1}</div>
               </>
             ) : (

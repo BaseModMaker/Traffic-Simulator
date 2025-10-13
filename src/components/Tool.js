@@ -1,8 +1,7 @@
 export default class Tool {
-  constructor(type, icon) {
-    this.type = type;
-    this.icon = icon;
-    this.name = type;
+  constructor(name) {
+    this.name = name.toLowerCase();
+    this.image = process.env.PUBLIC_URL + '/assets/tools/' + this.name + '.png';
   }
 
   use() {

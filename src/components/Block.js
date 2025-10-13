@@ -1,17 +1,16 @@
 import * as THREE from 'three';
 
 export default class Block {
-  constructor(type, texturePath) {
-    this.type = type;
-    this.icon = texturePath;
-    this.texturePath = texturePath;
+  constructor(name) {
+    this.name = name.toLowerCase();
+    this.image = process.env.PUBLIC_URL + '/assets/blocks/' + this.name + '.png';
     this.materials = null;
   }
 
   async loadMaterials() {
     const loader = new THREE.TextureLoader();
     const texture = await new Promise((resolve, reject) => {
-      loader.load(this.texturePath, resolve, undefined, reject);
+      loader.load(this.image, resolve, undefined, reject);
     });
 
     // Split the texture into four parts
@@ -52,7 +51,7 @@ export default class Block {
       tileSize / 2, // Raise cube above the tile
       z * tileSize - gridSize / 2 + tileSize / 2
     );
-    mesh.userData = { type: this.type, x, z };
+    mesh.userData = { name: this.name, x, z };
     return mesh;
   }
 }

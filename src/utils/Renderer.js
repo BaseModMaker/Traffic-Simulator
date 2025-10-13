@@ -18,7 +18,7 @@ export default class Renderer {
     this.handleResize = this.handleResize.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleClick = this.handleClick.bind(this);
-    this.buildTileType = 'grass';
+    this.buildTileName = 'grass';
     this.textures = {};
     this.materials = {};
     this.cameraZoomSpeed = 0.1;
@@ -68,8 +68,8 @@ export default class Renderer {
     }
   }
 
-  setBuildTileType(type) {
-    this.buildTileType = type;
+  setBuildTileName(name) {
+    this.buildTileName = name;
   }
 
   setGridInteractionEnabled(enabled) {
@@ -165,11 +165,11 @@ export default class Renderer {
     const { x, z } = this.hoveredTile.userData;
 
     // Check if the selected type is a sticker
-    const selectedSticker = this.stickers.find(s => s.type === this.buildTileType);
+    const selectedSticker = this.stickers.find(s => s.name === this.buildTileName);
     if (selectedSticker) {
       selectedSticker.createMesh(this.worldGrid.tileSize, x, z, this.worldGrid.gridSize).then(result => {
         if (!result) {
-          console.error(`Failed to create mesh for sticker "${this.buildTileType}".`);
+          console.error(`Failed to create mesh for sticker "${this.buildTileName}".`);
           return;
         }
 
@@ -181,24 +181,24 @@ export default class Renderer {
     }
 
     // Check if the selected type is a block
-    const selectedBlock = this.blocks.find(b => b.type === this.buildTileType);
+    const selectedBlock = this.blocks.find(b => b.name === this.buildTileName);
     if (selectedBlock) {
       this.worldGrid.placeBlock(selectedBlock, x, z);
       return;
     }
 
     // Delegate tile placement to WorldGrid
-    this.worldGrid.placeTile(this.hoveredTile, this.buildTileType);
+    this.worldGrid.placeTile(this.hoveredTile, this.buildTileName);
   }
 
   _placeTile(tile) {
-    const type = this.buildTileType || 'grass';
-    if (!type || type === 'interact') return;
-    if (this.materials[type]) {
-      tile.material = this.materials[type].clone();
-      tile.userData.baseMaterial = this.materials[type].clone();
-      tile.userData.highlightMaterial = this.materials[type + 'Highlight'].clone();
-      tile.userData.type = type;
+    const name = this.buildTileName || 'grass';
+    if (!name || name === 'interact') return;
+    if (this.materials[name]) {
+      tile.material = this.materials[name].clone();
+      tile.userData.baseMaterial = this.materials[name].clone();
+      tile.userData.highlightMaterial = this.materials[name + 'Highlight'].clone();
+      tile.userData.name = name;
     }
   }
 
@@ -226,7 +226,7 @@ export default class Renderer {
     if (event.button === 0) {
       this.isPlacing = true;
       // Place tile immediately if hovering over one
-      if (this.hoveredTile && this.buildTileType && this.buildTileType !== 'interact') {
+      if (this.hoveredTile && this.buildTileName && this.buildTileName !== 'interact') {
         this._placeTile(this.hoveredTile);
       }
     }
@@ -299,8 +299,8 @@ export default class Renderer {
         this.hoveredTile = tile;
       }
       // Paint while mouse is down
-      if (this.isPlacing && this.buildTileType && this.buildTileType !== 'interact') {
-        this.worldGrid.placeTile(tile, this.buildTileType);
+      if (this.isPlacing && this.buildTileName && this.buildTileName !== 'interact') {
+        this.worldGrid.placeTile(tile, this.buildTileName);
       }
     }
   }
