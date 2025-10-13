@@ -223,6 +223,13 @@ export default class Renderer {
 
     // Check if move mode is active
     if (this.moveModeCallback) {
+      // Ignore clicks on out-of-range tiles
+      const isInRange = this.highlightedTiles?.some(overlay => {
+        const overlayPosition = overlay.position;
+        return overlayPosition.x === this.hoveredTile.position.x && overlayPosition.z === this.hoveredTile.position.z;
+      });
+      if (!isInRange) return;
+
       this.moveModeCallback(this.hoveredTile); // Trigger the callback with the clicked tile
       this.moveModeCallback = null; // Reset move mode
       return;
