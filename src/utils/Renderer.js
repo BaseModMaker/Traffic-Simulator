@@ -91,20 +91,7 @@ export default class Renderer {
 
   enableMoveMode(callback) {
     this.moveModeCallback = callback;
-
-    // Apply special highlight effect for move mode
-    if (this.hoveredTile) {
-      this.hoveredTile.material = this.hoveredTile.userData.moveHighlightMaterial;
-    }
-  }
-
-  highlightTiles(tiles, color = 0x0000ff) {
-    this.clearHighlightedTiles(); // Clear existing highlights first
-    this.highlightedTiles = tiles.map(tile => {
-      const overlay = this._createHighlightOverlay(tile, color);
-      this.scene.add(overlay);
-      return overlay;
-    });
+    // No tile highlighting, just enable the callback
   }
 
   clearHighlightedTiles() {
@@ -224,10 +211,7 @@ export default class Renderer {
     // Check if move mode is active
     if (this.moveModeCallback) {
       // Ignore clicks on out-of-range tiles
-      const isInRange = this.highlightedTiles?.some(overlay => {
-        const overlayPosition = overlay.position;
-        return overlayPosition.x === this.hoveredTile.position.x && overlayPosition.z === this.hoveredTile.position.z;
-      });
+      const isInRange = this.worldGrid.isWithinMovementRange(x, z);
       if (!isInRange) return;
 
       this.moveModeCallback(this.hoveredTile); // Trigger the callback with the clicked tile
@@ -362,10 +346,8 @@ export default class Renderer {
       // Determine the hover overlay color
       let color = 0x00ff00; // Default green for in-range tiles
       if (this.moveModeCallback) {
-        const isInRange = this.highlightedTiles?.some(overlay => {
-          const overlayPosition = overlay.position;
-          return overlayPosition.x === tile.position.x && overlayPosition.z === tile.position.z;
-        });
+        const { x, z } = tile.userData;
+        const isInRange = this.worldGrid.isWithinMovementRange(x, z);
         color = isInRange ? 0x0000ff : 0xff0000; // Blue for in-range, red for out-of-range
       }
 
@@ -480,8 +462,10 @@ export default class Renderer {
     this.frameId = requestAnimationFrame(this.animate);
     // Smooth camera movement
     this._updateCameraTargetFromKeys();
+    // Smooth camera movement
+    this._updateCameraTargetFromKeys();
     this._updateCameraPosition(); // Ensure camera position updates every frame
-    if (this.renderer && this.scene && this.camera) {
+    if (this.renderer && this.scene && this.camera) { // Ensure camera position updates every frame
         this.renderer.render(this.scene, this.camera);
     }
   }

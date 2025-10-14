@@ -39,9 +39,8 @@ export default class Interact extends Tool {
             onMoveClick={(sticker) => {
               const { x: currentX, z: currentZ } = tile.userData;
 
-              // Highlight tiles within a radius
-              const selectableTiles = window.rendererInstance.worldGrid.getTilesWithinRadius(currentX, currentZ, 4);
-              window.rendererInstance.highlightTiles(selectableTiles, 0x0000ff); // Blue for movement range
+              // Draw the green boundary, no tile highlighting
+              window.rendererInstance.worldGrid.getTilesWithinRadius(currentX, currentZ, 4);
 
               // Enable tile selection for movement
               window.rendererInstance?.enableMoveMode((selectedTile) => {
@@ -67,6 +66,9 @@ export default class Interact extends Tool {
                     tile.userData.sticker = null;
                   });
                 }
+
+                // Clear the green boundary outline
+                window.rendererInstance.worldGrid.clearMovementBoundary();
 
                 root.unmount(); // Unmount the React component
                 buttonContainer.remove(); // Remove the button container
