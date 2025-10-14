@@ -214,6 +214,10 @@ export default class Renderer {
       const isInRange = this.worldGrid.isWithinMovementRange(x, z);
       if (!isInRange) return;
 
+      // Ignore clicks on occupied tiles
+      const isOccupied = this.hoveredTile.userData.sticker || this.hoveredTile.userData.block;
+      if (isOccupied) return;
+
       this.moveModeCallback(this.hoveredTile); // Trigger the callback with the clicked tile
       this.moveModeCallback = null; // Reset move mode
       return;
@@ -348,7 +352,15 @@ export default class Renderer {
       if (this.moveModeCallback) {
         const { x, z } = tile.userData;
         const isInRange = this.worldGrid.isWithinMovementRange(x, z);
-        color = isInRange ? 0x0000ff : 0xff0000; // Blue for in-range, red for out-of-range
+        const isOccupied = tile.userData.sticker || tile.userData.block;
+        
+        if (isOccupied) {
+          color = 0xff0000; // Red for occupied tiles
+        } else if (isInRange) {
+          color = 0x0000ff; // Blue for valid in-range tiles
+        } else {
+          color = 0xff0000; // Red for out-of-range tiles
+        }
       }
 
       // Create and add the hover overlay

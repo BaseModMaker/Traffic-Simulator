@@ -7,6 +7,7 @@ import { moveSticker } from '../../utils/StickerMovement';
 export default class Interact extends Tool {
   constructor() {
     super('interact');
+    this.reactRoot = null; // Store the React root instance
   }
 
   use(tile) {
@@ -15,7 +16,10 @@ export default class Interact extends Tool {
     // Remove existing buttons if they exist
     let buttonContainer = document.getElementById(buttonContainerId);
     if (buttonContainer) {
-      ReactDOM.createRoot(buttonContainer).unmount(); // Unmount the React component
+      if (this.reactRoot) {
+        this.reactRoot.unmount(); // Unmount using stored root
+        this.reactRoot = null;
+      }
       buttonContainer.remove();
       window.rendererInstance?.setGridInteractionEnabled(true); // Re-enable grid interaction
     }
@@ -32,8 +36,8 @@ export default class Interact extends Tool {
         window.rendererInstance?.setGridInteractionEnabled(false);
 
         // Render the InteractionButtons component
-        const root = ReactDOM.createRoot(buttonContainer);
-        root.render(
+        this.reactRoot = ReactDOM.createRoot(buttonContainer);
+        this.reactRoot.render(
           <InteractionButtons
             sticker={sticker} // Pass sticker data
             onMoveClick={(sticker) => {
@@ -45,6 +49,12 @@ export default class Interact extends Tool {
               // Enable tile selection for movement
               window.rendererInstance?.enableMoveMode((selectedTile) => {
                 const { x, z } = selectedTile.userData;
+
+                // Check if the target tile is occupied by a sticker or block
+                if (selectedTile.userData.sticker || selectedTile.userData.block) {
+                  // Target tile is occupied, ignore and continue move mode
+                  return;
+                }
 
                 // Move the sticker to the new tile with animation
                 const stickerKey = `${x},${z}`;
@@ -70,7 +80,10 @@ export default class Interact extends Tool {
                 // Clear the green boundary outline
                 window.rendererInstance.worldGrid.clearMovementBoundary();
 
-                root.unmount(); // Unmount the React component
+                if (this.reactRoot) {
+                  this.reactRoot.unmount(); // Unmount using stored root
+                  this.reactRoot = null;
+                }
                 buttonContainer.remove(); // Remove the button container
                 window.rendererInstance?.setGridInteractionEnabled(true); // Re-enable grid interaction
                 window.rendererInstance.clearHighlightedTiles(); // Clear highlighted tiles
