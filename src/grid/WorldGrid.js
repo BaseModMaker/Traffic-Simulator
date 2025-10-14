@@ -95,20 +95,44 @@ export default class WorldGrid {
     // Clear previous valid tiles
     this.validMovementTiles.clear();
 
-    // Collect tiles within the Manhattan perimeter
-    for (let x = Math.floor(centerX - radius); x <= Math.ceil(centerX + radius); x++) {
-      for (let z = Math.floor(centerZ - radius); z <= Math.ceil(centerZ + radius); z++) {
-        const manhattanDistance = Math.abs(x - centerX) + Math.abs(z - centerZ);
+    // BFS to find reachable tiles
+    const queue = [{ x: centerX, z: centerZ, distance: 0 }];
+    const visited = new Set();
+    visited.add(`${centerX},${centerZ}`);
 
-        // Only include tiles within the Manhattan distance
-        if (manhattanDistance <= radius) {
-          this.validMovementTiles.add(`${x},${z}`);
+    while (queue.length > 0) {
+      const { x, z, distance } = queue.shift();
+
+      // Add the current tile to valid movement tiles
+      this.validMovementTiles.add(`${x},${z}`);
+
+      // Stop if the distance exceeds the radius
+      if (distance >= radius) continue;
+
+      // Check neighbors (up, down, left, right)
+      const neighbors = [
+        { x: x, z: z - 1 },
+        { x: x, z: z + 1 },
+        { x: x - 1, z: z },
+        { x: x + 1, z: z },
+      ];
+
+      for (const neighbor of neighbors) {
+        const key = `${neighbor.x},${neighbor.z}`;
+        if (!visited.has(key)) {
+          const tile = this.gridMeshes.find(t => t.userData.x === neighbor.x && t.userData.z === neighbor.z);
+
+          // Only add the neighbor if it's not blocked
+          if (tile && !tile.userData.block) {
+            queue.push({ ...neighbor, distance: distance + 1 });
+            visited.add(key);
+          }
         }
       }
     }
 
     // Draw the boundary line
-    this._drawBoundary(centerX, centerZ, radius);
+    this._drawBoundary();
 
     return []; // Return empty array to prevent tile highlighting
   }
@@ -130,7 +154,7 @@ export default class WorldGrid {
     this.validMovementTiles.clear();
   }
 
-  _drawBoundary(centerX, centerZ, radius) {
+  _drawBoundary() {
     // Remove existing convex hull
     if (this.debugConvexHull) {
       this.scene.remove(this.debugConvexHull);
@@ -139,29 +163,24 @@ export default class WorldGrid {
       this.debugConvexHull = null;
     }
 
-    const tileSet = new Set();
-
-    // Collect tiles within the Manhattan perimeter
-    for (let x = Math.floor(centerX - radius); x <= Math.ceil(centerX + radius); x++) {
-      for (let z = Math.floor(centerZ - radius); z <= Math.ceil(centerZ + radius); z++) {
-        const manhattanDistance = Math.abs(x - centerX) + Math.abs(z - centerZ);
-
-        // Only include tiles within the Manhattan distance
-        if (manhattanDistance <= radius) {
-          tileSet.add(`${x},${z}`);
-        }
-      }
-    }
+    const tileSet = new Set(this.validMovementTiles);
 
     // Trace the rectilinear boundary
     const boundary = this._traceRectilinearBoundary(tileSet);
-    
+
     // Draw the boundary
     if (boundary.length > 0) {
-      const boundaryPoints = boundary.map(p => new THREE.Vector3(p.x, 0.01, p.z));
-        
+      const boundaryPoints = boundary.map(p => new THREE.Vector3(
+        p.x * this.tileSize - this.gridSize / 2,
+        0.01, // Slightly above the grid
+        p.z * this.tileSize - this.gridSize / 2
+      ));
+
+      // Close the loop by adding the first point at the end
+      boundaryPoints.push(boundaryPoints[0]);
+
       const boundaryGeometry = new THREE.BufferGeometry().setFromPoints(boundaryPoints);
-      const boundaryMaterial = new THREE.LineBasicMaterial({ color: new THREE.Color(0,0,1), linewidth: 2 });
+      const boundaryMaterial = new THREE.LineBasicMaterial({ color: new THREE.Color(0, 0, 1), linewidth: 2 });
       this.debugConvexHull = new THREE.Line(boundaryGeometry, boundaryMaterial);
       this.scene.add(this.debugConvexHull);
     }
@@ -169,69 +188,51 @@ export default class WorldGrid {
 
   _traceRectilinearBoundary(tileSet) {
     const edges = [];
-    
+
     // Find all edges that are on the boundary (adjacent to non-included tiles)
     tileSet.forEach(tileKey => {
       const [x, z] = tileKey.split(',').map(Number);
-      const tileWorldX = x * this.tileSize - this.gridSize / 2;
-      const tileWorldZ = z * this.tileSize - this.gridSize / 2;
-      
+
       // Check four edges of the tile
       const neighbors = [
-        { key: `${x},${z-1}`, edge: [[tileWorldX, tileWorldZ], [tileWorldX + this.tileSize, tileWorldZ]] }, // Bottom
-        { key: `${x+1},${z}`, edge: [[tileWorldX + this.tileSize, tileWorldZ], [tileWorldX + this.tileSize, tileWorldZ + this.tileSize]] }, // Right
-        { key: `${x},${z+1}`, edge: [[tileWorldX + this.tileSize, tileWorldZ + this.tileSize], [tileWorldX, tileWorldZ + this.tileSize]] }, // Top
-        { key: `${x-1},${z}`, edge: [[tileWorldX, tileWorldZ + this.tileSize], [tileWorldX, tileWorldZ]] } // Left
+        { key: `${x},${z - 1}`, edge: { x1: x, z1: z, x2: x + 1, z2: z } }, // Bottom
+        { key: `${x + 1},${z}`, edge: { x1: x + 1, z1: z, x2: x + 1, z2: z + 1 } }, // Right
+        { key: `${x},${z + 1}`, edge: { x1: x + 1, z1: z + 1, x2: x, z2: z + 1 } }, // Top
+        { key: `${x - 1},${z}`, edge: { x1: x, z1: z + 1, x2: x, z2: z } } // Left
       ];
-      
+
       neighbors.forEach(({ key, edge }) => {
         if (!tileSet.has(key)) {
           edges.push(edge);
         }
       });
     });
-    
-    // Convert edges to boundary points
-    const boundaryPoints = [];
+
+    // Sort edges into a continuous boundary
+    const boundary = [];
     if (edges.length > 0) {
-      // Start with the first edge
-      let currentEdge = edges[0];
-      boundaryPoints.push({ x: currentEdge[0][0], z: currentEdge[0][1] });
-      boundaryPoints.push({ x: currentEdge[1][0], z: currentEdge[1][1] });
-      
-      const usedEdges = new Set([0]);
-      
-      // Connect edges to form a continuous boundary
-      while (usedEdges.size < edges.length) {
-        const lastPoint = boundaryPoints[boundaryPoints.length - 1];
-        
-        let found = false;
-        for (let i = 0; i < edges.length; i++) {
-          if (usedEdges.has(i)) continue;
-          
-          const edge = edges[i];
-          if (Math.abs(edge[0][0] - lastPoint.x) < 0.01 && Math.abs(edge[0][1] - lastPoint.z) < 0.01) {
-            boundaryPoints.push({ x: edge[1][0], z: edge[1][1] });
-            usedEdges.add(i);
-            found = true;
-            break;
-          } else if (Math.abs(edge[1][0] - lastPoint.x) < 0.01 && Math.abs(edge[1][1] - lastPoint.z) < 0.01) {
-            boundaryPoints.push({ x: edge[0][0], z: edge[0][1] });
-            usedEdges.add(i);
-            found = true;
-            break;
-          }
+      let currentEdge = edges.pop();
+      boundary.push({ x: currentEdge.x1, z: currentEdge.z1 });
+      boundary.push({ x: currentEdge.x2, z: currentEdge.z2 });
+
+      while (edges.length > 0) {
+        const lastPoint = boundary[boundary.length - 1];
+        const nextEdgeIndex = edges.findIndex(edge =>
+          (Math.abs(edge.x1 - lastPoint.x) < 0.01 && Math.abs(edge.z1 - lastPoint.z) < 0.01) ||
+          (Math.abs(edge.x2 - lastPoint.x) < 0.01 && Math.abs(edge.z2 - lastPoint.z) < 0.01)
+        );
+
+        if (nextEdgeIndex === -1) break;
+
+        const nextEdge = edges.splice(nextEdgeIndex, 1)[0];
+        if (Math.abs(nextEdge.x1 - lastPoint.x) < 0.01 && Math.abs(nextEdge.z1 - lastPoint.z) < 0.01) {
+          boundary.push({ x: nextEdge.x2, z: nextEdge.z2 });
+        } else {
+          boundary.push({ x: nextEdge.x1, z: nextEdge.z1 });
         }
-        
-        if (!found) break;
-      }
-      
-      // Close the loop
-      if (boundaryPoints.length > 0) {
-        boundaryPoints.push({ x: boundaryPoints[0].x, z: boundaryPoints[0].z });
       }
     }
-    
-    return boundaryPoints;
+
+    return boundary;
   }
 }
