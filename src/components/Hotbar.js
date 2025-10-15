@@ -8,6 +8,7 @@ import Engineer from '../gameobjects/stickers/Engineer';
 import Sniper from '../gameobjects/stickers/Sniper';
 import Shellback_Sentinel from '../gameobjects/stickers/ShellbackSentinel';
 import Clankette_The_Patchsmith from '../gameobjects/stickers/ClanketteThePatchsmith';
+import Spider from '../gameobjects/stickers/Spider';
 
 const HOTBAR_SIZE = 10;
 
@@ -22,7 +23,8 @@ const Hotbar = ({ tiles, buildMenuOpen, setBuildMenuOpen, selectedTile, setSelec
     Sniper.name.toLowerCase(),   // 7
     Shellback_Sentinel.name.toLowerCase(), // 8
     Clankette_The_Patchsmith.name.toLowerCase(), // 9
-    ...Array(HOTBAR_SIZE - 9).fill(null)
+    Spider.name.toLowerCase(), // 0
+    ...Array(HOTBAR_SIZE - 10).fill(null)
   ]);
   const [selectedHotbar, setSelectedHotbar] = useState(0);
   const [hotbarHovered, setHotbarHovered] = useState(false);

@@ -348,7 +348,8 @@ export default class Renderer {
       const tile = intersects[0].object;
 
       // Determine the hover overlay color
-      let color = 0x00ff00; // Default green for in-range tiles
+      let lightgray = new THREE.Color(0.5, 0.5, 0.5);
+      let color = lightgray; // Default hover color
       if (this.moveModeCallback) {
         const { x, z } = tile.userData;
         const isInRange = this.worldGrid.isWithinMovementRange(x, z);

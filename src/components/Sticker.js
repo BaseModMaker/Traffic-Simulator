@@ -6,6 +6,9 @@ export default class Sticker {
     this.name = name.toLowerCase();
     this.image = process.env.PUBLIC_URL + '/assets/stickers/' + this.name + '.png';
     this.material = null;
+    this.health = 100; // Default health value
+    this.maxHealth = 100; // Maximum health value
+    this.healthBar = null; // Health bar mesh
   }
 
   async loadMaterial() {
@@ -54,6 +57,27 @@ export default class Sticker {
     mesh.castShadow = true; // Enable casting shadows
     mesh.receiveShadow = true; // Enable receiving shadows
     mesh.userData = { name: this.name, x, z };
+
+    // Create the health bar
+    const healthBarGeometry = new THREE.PlaneGeometry(tileSize * 0.8, tileSize * 0.1);
+    const healthBarMaterial = new THREE.MeshBasicMaterial({
+      color: 0x00ff00, // Green for full health
+      transparent: true,
+    });
+    this.healthBar = new THREE.Mesh(healthBarGeometry, healthBarMaterial);
+    this.healthBar.position.set(0, tileSize * 0.5, 0); // Position above the sticker
+    this.healthBar.rotation.x = -Math.PI / 2; // Align horizontally
+    mesh.add(this.healthBar); // Attach health bar to the sticker mesh
+
     return { mesh };
+  }
+
+  updateHealth(newHealth) {
+    this.health = Math.max(0, Math.min(newHealth, this.maxHealth)); // Clamp health between 0 and maxHealth
+    if (this.healthBar) {
+      const healthRatio = this.health / this.maxHealth;
+      this.healthBar.scale.x = healthRatio; // Scale the health bar width
+      this.healthBar.material.color.set(healthRatio > 0.5 ? 0x00ff00 : healthRatio > 0.2 ? 0xffff00 : 0xff0000); // Green, yellow, red
+    }
   }
 }

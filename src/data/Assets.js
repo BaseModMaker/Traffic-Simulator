@@ -7,13 +7,20 @@ import Engineer from '../gameobjects/stickers/Engineer';
 import Sniper from '../gameobjects/stickers/Sniper';
 import ShellbackSentinel from '../gameobjects/stickers/ShellbackSentinel';
 import ClanketteThePatchsmith from '../gameobjects/stickers/ClanketteThePatchsmith';
+import Spider from '../gameobjects/stickers/Spider';
+import Dirt from '../gameobjects/tiles/Dirt';
 
 export const TOOLS = [new Interact()];
-export const TILES = [new Road(), new Grass()];
+export const TILES = [
+  new Road(), 
+  new Grass(), 
+  new Dirt()
+];
 export const BLOCKS = [new Ammo(), new Saloon()];
 export const STICKERS = [
   new Engineer(),
   new Sniper(),
   new ShellbackSentinel(),
-  new ClanketteThePatchsmith()
+  new ClanketteThePatchsmith(),
+  new Spider()
 ];

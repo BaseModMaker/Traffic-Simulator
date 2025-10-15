@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import Grass from "../gameobjects/tiles/Grass";
+import Dirt from "../gameobjects/tiles/Dirt";
 
 export default class WorldGrid {
   constructor(scene, tileCount, tileSize, tiles) {
@@ -19,17 +19,17 @@ export default class WorldGrid {
     // Load materials for all tiles
     await Promise.all(this.tiles.map(tile => tile.loadMaterials()));
 
-    // Find the grass tile
-    const grassTile = this.tiles.find(tile => tile.name === Grass.name.toLowerCase());
-    if (!grassTile) {
-      console.error('Grass tile not found in the tiles array.');
+    // Find the default tile
+    const defaultTile = this.tiles.find(tile => tile.name === Dirt.name.toLowerCase());
+    if (!defaultTile) {
+      console.error('Default tile not found in the tiles array.');
       return;
     }
 
-    // Build the grid with grass tiles
+    // Build the grid with default tiles
     for (let x = 0; x < this.tileCount; x++) {
       for (let z = 0; z < this.tileCount; z++) {
-        const mesh = grassTile.createMesh(this.tileSize, x, z, this.gridSize);
+        const mesh = defaultTile.createMesh(this.tileSize, x, z, this.gridSize);
         this.scene.add(mesh);
         mesh.receiveShadow = true; // Enable receiving shadows for tiles
         this.gridMeshes.push(mesh);
